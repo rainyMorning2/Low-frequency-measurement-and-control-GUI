@@ -73,6 +73,7 @@ private:
      * analog choose
     */
     void analogInit();
+    QButtonGroup* checkGroup;
 
     /*
      * state display

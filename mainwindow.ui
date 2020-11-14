@@ -82,79 +82,35 @@ p, li { white-space: pre-wrap; }
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <property name="documentMode">
          <bool>false</bool>
         </property>
-        <widget class="QWidget" name="tab">
+        <widget class="QWidget" name="tab_1">
          <attribute name="title">
           <string>Tab 1</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="checkBox">
-            <property name="text">
-             <string>CheckBox</string>
-            </property>
-            <property name="autoExclusive">
-             <bool>false</bool>
-            </property>
-            <property name="tristate">
-             <bool>false</bool>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">checkGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="checkBox_2">
-            <property name="text">
-             <string>CheckBox</string>
-            </property>
-            <property name="autoExclusive">
-             <bool>false</bool>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">checkGroup</string>
-            </attribute>
-           </widget>
-          </item>
-         </layout>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
           <string>Tab 2</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_7">
-          <item row="0" column="0">
-           <widget class="QCheckBox" name="checkBox_3">
-            <property name="text">
-             <string>CheckBox</string>
-            </property>
-            <property name="autoExclusive">
-             <bool>false</bool>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">checkGroup</string>
-            </attribute>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QCheckBox" name="checkBox_4">
-            <property name="text">
-             <string>CheckBox</string>
-            </property>
-            <property name="autoExclusive">
-             <bool>false</bool>
-            </property>
-            <attribute name="buttonGroup">
-             <string notr="true">checkGroup</string>
-            </attribute>
-           </widget>
-          </item>
-         </layout>
+        </widget>
+        <widget class="QWidget" name="tab_3">
+         <attribute name="title">
+          <string>Tab 3</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_4">
+         <attribute name="title">
+          <string>Tab 4</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="tab_5">
+         <attribute name="title">
+          <string>Tab 5</string>
+         </attribute>
         </widget>
        </widget>
       </item>
@@ -523,11 +479,4 @@ p, li { white-space: pre-wrap; }
  </customwidgets>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="checkGroup">
-   <property name="exclusive">
-    <bool>false</bool>
-   </property>
-  </buttongroup>
- </buttongroups>
 </ui>
