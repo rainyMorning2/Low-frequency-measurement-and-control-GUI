@@ -2,6 +2,41 @@
 #include "ui_mainwindow.h"
 
 
+QChartView* MainWindow::addNewChart(QString title){
+
+    QChartView* mChart = new QChartView();
+    mChart->setEnabled(true);
+    mChart->chart()->setTitle(title);
+    mChart->chart()->legend()->hide();
+    mChart->chart()->setTheme(QtCharts::QChart::ChartTheme::ChartThemeDark);
+
+    QValueAxis* vaX = new QValueAxis();
+    QValueAxis* vaY1 = new QValueAxis();
+    QSplineSeries* spY1 = new QSplineSeries();
+
+    vaX->setRange(0, 500);
+    vaX->setTickCount(7);
+    vaX->setLabelsColor(QColor(0, 255, 0));
+    vaX->setTitleText("Sample-Points");
+
+    vaY1->setRange(0, 200);
+    vaY1->setTickCount(6);
+    vaY1->setLabelsColor(QColor(255,0, 0));
+    vaY1->setTitleText("Voltage-Kv");
+
+    mChart->chart()->addAxis(vaX, Qt::AlignBottom);
+    mChart->chart()->addAxis(vaY1, Qt::AlignLeft);
+    mChart->chart()->addSeries(spY1);
+
+    spY1->attachAxis(vaX);
+    spY1->attachAxis(vaY1);
+    spY1->setColor(QColor(255, 0, 0));
+    spY1->setUseOpenGL();// 开启openGL加速
+
+    return mChart;
+
+}
+
 void MainWindow::displayInit(){
     QChartView* mChart;
     QValueAxis* vaX;
@@ -60,7 +95,7 @@ void MainWindow::displayInit(){
 //    connect(timer1, SIGNAL(timeout()), this, SLOT(timer1Slot()));
 //    timer1->start();
 
-    ui->widget->setChart(mChart->chart());
+//    ui->widget->setChart(mChart->chart());
 
 }
 

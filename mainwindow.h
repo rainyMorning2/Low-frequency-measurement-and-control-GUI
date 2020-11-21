@@ -67,6 +67,7 @@ private:
      * analog display
     */
     void displayInit();
+    QChartView* addNewChart(QString);
 
 
     /*

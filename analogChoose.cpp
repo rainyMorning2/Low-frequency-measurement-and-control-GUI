@@ -32,13 +32,15 @@ void MainWindow::analogInit(){
 void MainWindow::check(int id, bool checked)
 {
 
+
     if(checked){
         if(currentNum < maxDisplay){
             // add a new chart
             QChartView* qcv;
-            qcv = new QChartView();
+            qcv = addNewChart(QString::number(id));
             qcv->setObjectName(QString::number(id));
             ui->verticalLayout->addWidget(qcv);
+            ui->verticalLayout->setStretchFactor(qcv,1);
             qDebug()<<id<<" checked";
             currentNum++;
         }

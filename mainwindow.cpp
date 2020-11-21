@@ -5,7 +5,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
-//    setWindowState(Qt::WindowMaximized);
+    setWindowState(Qt::WindowMaximized);
     ui->setupUi(this);
 
     QString file;
@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     tcpInit();
     modeCtrlInit();
-    displayInit();
+//    displayInit();
     analogInit();
 }
 
