@@ -45,15 +45,11 @@ void MainWindow::check(int id, bool checked)
             currentNum++;
         }
     }else{
-        QList<QChartView*> views = this->findChildren<QChartView *>();
-        foreach(QChartView* view, views){
-            if(view->objectName()==QString::number(id)){
-                ui->verticalLayout->removeWidget(view);
-                view->deleteLater();
-                qDebug()<<id<<" deleted "<<view->objectName();
-                currentNum--;
-            }
-        }
+        QChartView* view = this->findChild<QChartView *>(QString::number(id));
+        ui->verticalLayout->removeWidget(view);
+        qDebug()<<id<<" deleted "<<view->objectName();
+        view->deleteLater();
+        currentNum--;
     }
 
 
