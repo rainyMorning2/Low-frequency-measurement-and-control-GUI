@@ -8,6 +8,8 @@
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QSplineSeries>
 #include <QSettings>
+#include <QCheckBox>
+#include <QSaveFile>
 
 using namespace QtCharts;
 
@@ -45,40 +47,35 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    void printToConsole(QString);
     QSettings* settings;
-    int maxDisplay;
-    int currentNum;
+    void printToConsole(QString);
 
     /*
      * tcp/ip connection
     */
+    QTcpSocket* socket;
     void tcpInit();
     void sendMessage(QString);
-    QTcpSocket* socket;
 
     /*
      * mode control
     */
-    void modeCtrlInit();
     QButtonGroup* buttonGroup;
+    void modeCtrlInit();
 
     /*
      * analog display
     */
-    void displayInit();
+    int maxDisplay;
+    int currentNum;
+    QButtonGroup* checkGroup;
+    QVector<QPointF> analogData[200];
+    void analogInit();
     QChartView* addNewChart(QString);
 
 
     /*
-     * analog choose
+     * statse display
     */
-    void analogInit();
-    QButtonGroup* checkGroup;
-
-    /*
-     * state display
-    */
-    void updateState();
 };
 #endif // MAINWINDOW_H

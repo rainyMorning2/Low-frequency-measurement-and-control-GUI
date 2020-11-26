@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     tcpInit();
     modeCtrlInit();
-//    displayInit();
     analogInit();
 }
 

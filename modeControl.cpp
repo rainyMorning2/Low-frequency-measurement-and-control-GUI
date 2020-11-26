@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "chrono"
+#include "thread"
 
 const int SELFCHECK = 0;
 const int NORMAL = 1;
@@ -31,10 +33,8 @@ void MainWindow::on_pushButton_start_clicked()
         case RESET:
             break;
         case SELFCHECK:
-            printToConsole("hello1");
             break;
         case NORMAL:
-            printToConsole("hello2");
             break;
         case HIGHSPEED:
             if (ui->lineEdit_high_speed_channel->text()==""){
@@ -50,13 +50,22 @@ void MainWindow::on_pushButton_start_clicked()
 
 void MainWindow::on_pushButton_stop_clicked()
 {
-
+    std::this_thread::sleep_for(std::chrono::nanoseconds(2));
 }
 
 
 void MainWindow::on_pushButton_save_clicked()
 {
+    QSaveFile file(QCoreApplication::applicationDirPath()+"/data.txt");
+    file.open(QIODevice::WriteOnly);
+    for (int i=0;i<200 ;i++ ) {
+        for(int j=0;j<analogData[i].size();j++){
+//            file.write(analogData[i][j]);
+        }
 
+    }
+
+    file.commit();
 }
 
 void MainWindow::on_pushButton_load_clicked()

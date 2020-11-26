@@ -62,7 +62,23 @@ void MainWindow::socket_Read_Data()
     if(!buffer.isEmpty())
     {
         // 解析返回值，判断
-        qDebug() << tr(buffer);
+//        qDebug() << tr(buffer);
+        qDebug() << buffer.size();
+
+        static int cnt = 0;
+        // fill in the analogData vector array
+        for (int i=0;i<200;i++) {
+            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
+            qDebug()<<analogData[i];
+        }
+        cnt++;
+        // refresh all
+        for (QChartView* qcv : this->findChildren<QChartView*>()) {
+            auto q = (QSplineSeries*)qcv->chart()->series()[0];
+            q->replace(analogData[qcv->objectName().toInt()]);
+        }
+
+
     }
 }
 
