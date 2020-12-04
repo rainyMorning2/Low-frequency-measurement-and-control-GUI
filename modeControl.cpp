@@ -8,6 +8,14 @@ const int NORMAL = 1;
 const int HIGHSPEED = 2;
 const int RESET = 3;
 
+
+/*
+    //TODO
+    1.finish save and load including auto save
+    2.finish control conmand
+
+*/
+
 void MainWindow::modeCtrlInit(){
 
     buttonGroup = new QButtonGroup();
@@ -29,8 +37,11 @@ void MainWindow::on_radioButton_high_speed_mode_toggled(bool checked)
 
 void MainWindow::on_pushButton_start_clicked()
 {
+
     switch(buttonGroup->checkedId()){
         case RESET:
+//            QString mess;
+//            sendMessage(mess);
             break;
         case SELFCHECK:
             break;

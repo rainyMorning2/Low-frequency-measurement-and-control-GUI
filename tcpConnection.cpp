@@ -1,6 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/*
+    //TODO
+    1.unpack data and store in analogData
+    2.set a up-bound to cnt
+    3.aoto-save when buffer is full
+    4.print2consle
+*/
+
+
 void MainWindow::tcpInit(){
     socket = new QTcpSocket();
     //连接信号槽
@@ -54,6 +63,7 @@ void MainWindow::on_pushButton_Connect_clicked()
     }
 }
 
+
 void MainWindow::socket_Read_Data()
 {
     QByteArray buffer;
@@ -62,21 +72,21 @@ void MainWindow::socket_Read_Data()
     if(!buffer.isEmpty())
     {
         // 解析返回值，判断
-//        qDebug() << tr(buffer);
+        qDebug() << tr(buffer);
         qDebug() << buffer.size();
 
-        static int cnt = 0;
-        // fill in the analogData vector array
-        for (int i=0;i<200;i++) {
-            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
-            qDebug()<<analogData[i];
-        }
-        cnt++;
-        // refresh all
-        for (QChartView* qcv : this->findChildren<QChartView*>()) {
-            auto q = (QSplineSeries*)qcv->chart()->series()[0];
-            q->replace(analogData[qcv->objectName().toInt()]);
-        }
+//        static int cnt = 0;
+//        // fill in the analogData vector array
+//        for (int i=0;i<200;i++) {
+//            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
+//            qDebug()<<analogData[i];
+//        }
+//        cnt++;
+//        // refresh all
+//        for (QChartView* qcv : this->findChildren<QChartView*>()) {
+//            auto q = (QSplineSeries*)qcv->chart()->series()[0];
+//            q->replace(analogData[qcv->objectName().toInt()]);
+//        }
 
 
     }
@@ -97,6 +107,6 @@ void MainWindow::socket_Disconnected()
     ui->pushButton_stop->setEnabled(false);
     //修改按键文字
     ui->pushButton_Connect->setText("连接");
-    qDebug() << "断开连接!";
+    qDebug() << "disconnected！";
 }
 

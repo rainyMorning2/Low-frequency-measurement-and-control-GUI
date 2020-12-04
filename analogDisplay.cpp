@@ -1,6 +1,12 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+/*
+    //TODO
+    1. set Axis range
+    2. add avg to each channel
+    3. print2consle
+*/
 
 void MainWindow::analogInit(){
     currentNum = 0;
