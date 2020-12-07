@@ -39,27 +39,27 @@
         </property>
         <widget class="QWidget" name="tab_1">
          <attribute name="title">
-          <string>Tab 1</string>
+          <string>高压通道</string>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
-          <string>Tab 2</string>
+          <string>低压通道1</string>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">
-          <string>Tab 3</string>
+          <string>低压通道2</string>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_4">
          <attribute name="title">
-          <string>Tab 4</string>
+          <string>低压通道3</string>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">
-          <string>Tab 5</string>
+          <string>低压通道4</string>
          </attribute>
         </widget>
        </widget>

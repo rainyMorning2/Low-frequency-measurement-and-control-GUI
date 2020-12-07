@@ -13,7 +13,7 @@ const int RESET = 3;
     //TODO
     1.finish save and load including auto save
     2.finish control conmand
-
+    3. print2consle
 */
 
 void MainWindow::modeCtrlInit(){

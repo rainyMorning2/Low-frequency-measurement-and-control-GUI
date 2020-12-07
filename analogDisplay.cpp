@@ -1,18 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-/*
-    //TODO
-    1. set Axis range
-    2. add avg to each channel
-    3. print2consle
-*/
-
 void MainWindow::analogInit(){
     currentNum = 0;
     maxDisplay = settings->value("MaxDisplay").toInt();
     checkGroup = new QButtonGroup();
-    QList<QGridLayout*> layouts;
 
     for(int i=0;i<200;i++){
         analogData[i] = QVector<QPointF>();
@@ -21,19 +13,26 @@ void MainWindow::analogInit(){
     checkGroup->setExclusive(false);
 
     for(int i=0;i<5;i++){
-        layouts.append(new QGridLayout());
+        tab_layouts.append(new QGridLayout());
         for(int j=0;j<40;j++){
-            QCheckBox* checkbox = new QCheckBox();
-            layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?1:0);
+            QString check_name;
+            if(i==0){
+                check_name = QString("高压通道 ").append(QString().setNum(i*40+j+1));
+            }else{
+                check_name = QString("低压通道 ").append(QString().setNum((i-1)*40+j+1));
+            }
+            QCheckBox* checkbox = new QCheckBox(check_name);
+            tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?2:0);
+            tab_layouts[i]->addWidget(new QLabel("avg: "),j-20<0?j:j-20,j-20>=0?3:1);
             checkGroup->addButton(checkbox,i*40+j+1);
         }
     }
 
-    ui->tab_1->setLayout(layouts[0]);
-    ui->tab_2->setLayout(layouts[1]);
-    ui->tab_3->setLayout(layouts[2]);
-    ui->tab_4->setLayout(layouts[3]);
-    ui->tab_5->setLayout(layouts[4]);
+    ui->tab_1->setLayout(tab_layouts[0]);
+    ui->tab_2->setLayout(tab_layouts[1]);
+    ui->tab_3->setLayout(tab_layouts[2]);
+    ui->tab_4->setLayout(tab_layouts[3]);
+    ui->tab_5->setLayout(tab_layouts[4]);
 
     connect(checkGroup,SIGNAL(idToggled(int,bool)),this,SLOT(check(int,bool)));
 }
@@ -47,18 +46,16 @@ void MainWindow::check(int id, bool checked)
         if(currentNum < maxDisplay){
             // add a new chart
             QChartView* qcv;
-            qcv = addNewChart(QString::number(id));
+            qcv = addNewChart(id);
             qcv->setObjectName(QString::number(id));
             ui->verticalLayout->addWidget(qcv);
             ui->verticalLayout->setStretchFactor(qcv,1);
-            qDebug()<<id<<" checked";
             currentNum++;
 
         }
     }else{
         QChartView* view = this->findChild<QChartView *>(QString::number(id));
         ui->verticalLayout->removeWidget(view);
-        qDebug()<<id<<" deleted "<<view->objectName();
         view->deleteLater();
         currentNum--;
     }
@@ -86,7 +83,18 @@ void MainWindow::check(int id, bool checked)
 }
 
 
-QChartView* MainWindow::addNewChart(QString title){
+QChartView* MainWindow::addNewChart(int id){
+
+    QString title;
+    int xRange = settings->value("xRange").toInt();;
+    int yRange;
+    if(id <= 40){
+        title = QString("高压通道 ").append(QString::number(id));
+        yRange = 200;
+    }else{
+        title = QString("低压通道 ").append(QString::number(id-40));
+        yRange = 100;
+    }
 
     QChartView* mChart = new QChartView();
     mChart->setEnabled(true);
@@ -98,12 +106,12 @@ QChartView* MainWindow::addNewChart(QString title){
     QValueAxis* vaY1 = new QValueAxis();
     QSplineSeries* spY1 = new QSplineSeries();
 
-    vaX->setRange(0, 500);
+    vaX->setRange(0, xRange);
     vaX->setTickCount(7);
     vaX->setLabelsColor(QColor(0, 255, 0));
     vaX->setTitleText("Sample-Points");
 
-    vaY1->setRange(0, 200);
+    vaY1->setRange(0, yRange);
     vaY1->setTickCount(6);
     vaY1->setLabelsColor(QColor(255,0, 0));
     vaY1->setTitleText("Voltage-Kv");

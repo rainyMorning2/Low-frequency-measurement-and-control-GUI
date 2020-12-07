@@ -10,6 +10,7 @@
 #include <QSettings>
 #include <QCheckBox>
 #include <QSaveFile>
+#include <QGridLayout>
 
 using namespace QtCharts;
 
@@ -71,8 +72,8 @@ private:
     QButtonGroup* checkGroup;
     QVector<QPointF> analogData[200];
     void analogInit();
-    QChartView* addNewChart(QString);
-
+    QChartView* addNewChart(int);
+    QList<QGridLayout*> tab_layouts;
 
     /*
      * statse display

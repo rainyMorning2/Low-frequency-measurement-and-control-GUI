@@ -18,6 +18,7 @@ void MainWindow::tcpInit(){
 
     ui->lineEdit_IP->setText(settings->value("IP").toString());
     ui->lineEdit_Port->setText(settings->value("port").toString());
+
 }
 
 
@@ -67,6 +68,7 @@ void MainWindow::on_pushButton_Connect_clicked()
 void MainWindow::socket_Read_Data()
 {
     QByteArray buffer;
+    double avg[200];
     //读取缓冲区数据
     buffer = socket->readAll();
     if(!buffer.isEmpty())
@@ -75,20 +77,26 @@ void MainWindow::socket_Read_Data()
         qDebug() << tr(buffer);
         qDebug() << buffer.size();
 
-//        static int cnt = 0;
-//        // fill in the analogData vector array
-//        for (int i=0;i<200;i++) {
-//            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
-//            qDebug()<<analogData[i];
-//        }
-//        cnt++;
-//        // refresh all
-//        for (QChartView* qcv : this->findChildren<QChartView*>()) {
-//            auto q = (QSplineSeries*)qcv->chart()->series()[0];
-//            q->replace(analogData[qcv->objectName().toInt()]);
-//        }
-
-
+        static int cnt = 0;
+        // fill in the analogData vector array
+        for (int i=0;i<200;i++) {
+            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
+            avg[i] = std::accumulate(analogData[i].begin(),analogData[i].end(),QPointF(0,0)).y();
+            avg[i] /= (cnt+1);
+        }
+        cnt++;
+        // refresh all
+        for (QChartView* qcv : this->findChildren<QChartView*>()) {
+            auto q = (QSplineSeries*)qcv->chart()->series()[0];
+            q->replace(analogData[qcv->objectName().toInt()]);
+        }
+//        update avg
+        for(int i=0;i<5;i++){
+            for(int j=0;j<40;j++){
+                auto label_temp = qobject_cast<QLabel *>(tab_layouts[i]->itemAtPosition(j-20<0?j:j-20,j-20>=0?3:1)->widget());
+                label_temp->setText(QString("avg:  ").append(QString().setNum(avg[i*40+j])));
+            }
+        }
     }
 }
 
