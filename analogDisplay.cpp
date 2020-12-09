@@ -45,9 +45,7 @@ void MainWindow::check(int id, bool checked)
     if(checked){
         if(currentNum < maxDisplay){
             // add a new chart
-            QChartView* qcv;
-            qcv = addNewChart(id);
-            qcv->setObjectName(QString::number(id));
+            QChartView* qcv = addNewChart(id);
             ui->verticalLayout->addWidget(qcv);
             ui->verticalLayout->setStretchFactor(qcv,1);
             currentNum++;
@@ -88,6 +86,8 @@ QChartView* MainWindow::addNewChart(int id){
     QString title;
     int xRange = settings->value("xRange").toInt();;
     int yRange;
+
+    // TODO
     if(id <= 40){
         title = QString("高压通道 ").append(QString::number(id));
         yRange = 200;
@@ -101,6 +101,7 @@ QChartView* MainWindow::addNewChart(int id){
     mChart->chart()->setTitle(title);
     mChart->chart()->legend()->hide();
     mChart->chart()->setTheme(QtCharts::QChart::ChartTheme::ChartThemeDark);
+    mChart->setObjectName(QString::number(id));
 
     QValueAxis* vaX = new QValueAxis();
     QValueAxis* vaY1 = new QValueAxis();
@@ -114,7 +115,7 @@ QChartView* MainWindow::addNewChart(int id){
     vaY1->setRange(0, yRange);
     vaY1->setTickCount(6);
     vaY1->setLabelsColor(QColor(255,0, 0));
-    vaY1->setTitleText("Voltage-Kv");
+    vaY1->setTitleText("Voltage-V");
 
     mChart->chart()->addAxis(vaX, Qt::AlignBottom);
     mChart->chart()->addAxis(vaY1, Qt::AlignLeft);
@@ -124,6 +125,8 @@ QChartView* MainWindow::addNewChart(int id){
     spY1->attachAxis(vaY1);
     spY1->setColor(QColor(255, 0, 0));
     spY1->setUseOpenGL();// 开启openGL加速
+
+    spY1->replace(analogData[id-1]);
 
     return mChart;
 

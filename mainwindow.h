@@ -56,7 +56,7 @@ private:
     */
     QTcpSocket* socket;
     void tcpInit();
-    void sendMessage(QString);
+    void sendMessage(QByteArray);
 
     /*
      * mode control

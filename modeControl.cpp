@@ -37,15 +37,35 @@ void MainWindow::on_radioButton_high_speed_mode_toggled(bool checked)
 
 void MainWindow::on_pushButton_start_clicked()
 {
-
+    QByteArray mess;
     switch(buttonGroup->checkedId()){
         case RESET:
-//            QString mess;
+//            mess = (QByteArray::fromHex("7A01E9"));
+            mess = (QByteArray::fromHex("E9017A"));
+            sendMessage(mess);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//            mess = (QByteArray::fromHex("7A21E9"));
+            mess = (QByteArray::fromHex("E9217A"));
+//            sendMessage(mess);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+//            mess = (QByteArray::fromHex("7A41E9"));
+            mess = (QByteArray::fromHex("E9417A"));
 //            sendMessage(mess);
             break;
         case SELFCHECK:
             break;
         case NORMAL:
+//            mess = (QByteArray::fromHex("7A73E9"));
+            mess = (QByteArray::fromHex("E9737A"));
+            sendMessage(mess);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(200));
+//            mess = (QByteArray::fromHex("7A33E9"));
+            mess = (QByteArray::fromHex("E9337A"));
+//            sendMessage(mess);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(200));
+//            mess = (QByteArray::fromHex("7A53E9"));
+            mess = (QByteArray::fromHex("E9537A"));
+//            sendMessage(mess);
             break;
         case HIGHSPEED:
             if (ui->lineEdit_high_speed_channel->text()==""){
@@ -61,25 +81,45 @@ void MainWindow::on_pushButton_start_clicked()
 
 void MainWindow::on_pushButton_stop_clicked()
 {
-    std::this_thread::sleep_for(std::chrono::nanoseconds(2));
+    QByteArray mess;
+//    mess = (QByteArray::fromHex("7A75E9"));
+    mess = (QByteArray::fromHex("E9757A"));
+    sendMessage(mess);
+    std::this_thread::sleep_for(std::chrono::nanoseconds(200));
+//    mess = (QByteArray::fromHex("7A35E9"));
+    mess = (QByteArray::fromHex("E9357A"));
+//    sendMessage(mess);
+    std::this_thread::sleep_for(std::chrono::nanoseconds(200));
+//    mess = (QByteArray::fromHex("7A55E9"));
+    mess = (QByteArray::fromHex("E9557A"));
+//    sendMessage(mess);
 }
 
 
 void MainWindow::on_pushButton_save_clicked()
 {
-    QSaveFile file(QCoreApplication::applicationDirPath()+"/data.txt");
+    QFile file("file.dat");
     file.open(QIODevice::WriteOnly);
-    for (int i=0;i<200 ;i++ ) {
-        for(int j=0;j<analogData[i].size();j++){
-//            file.write(analogData[i][j]);
-        }
+    QDataStream out(&file);   // we will serialize the data into the file
+    out << QString("the answer is");   // serialize a string
+    out << (qint32)42;        // serialize an integer
+    analogData[0].append(QPointF(2,3));
+    out << analogData;
 
-    }
-
-    file.commit();
 }
 
 void MainWindow::on_pushButton_load_clicked()
 {
+    QFile file("file.dat");
+    file.open(QIODevice::ReadOnly);
+    QDataStream in(&file);    // read the data serialized from the file
+    QString str;
+    qint32 a;
+    QList<QVector<QPointF>> s;
+    in >> str >> a >> s;
+    qDebug()<<str;
+    qDebug()<<a;
+    qDebug()<<s;
+
 
 }

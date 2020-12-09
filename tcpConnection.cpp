@@ -4,7 +4,6 @@
 /*
     //TODO
     1.unpack data and store in analogData
-    2.set a up-bound to cnt
     3.aoto-save when buffer is full
     4.print2consle
 */
@@ -43,9 +42,11 @@ void MainWindow::on_pushButton_Connect_clicked()
         if(!socket->waitForConnected(30000))
         {
             qDebug() << "Connection failed!";
+            printToConsole("连接超时");
             return;
         }
         qDebug() << "Connect successfully!";
+        printToConsole("连接成功");
 
         //发送按键使能
         ui->pushButton_start->setEnabled(true);
@@ -69,41 +70,46 @@ void MainWindow::socket_Read_Data()
 {
     QByteArray buffer;
     double avg[200];
+    int xRange = settings->value("xRange").toInt();
     //读取缓冲区数据
     buffer = socket->readAll();
     if(!buffer.isEmpty())
     {
         // 解析返回值，判断
-        qDebug() << tr(buffer);
+        qDebug() << buffer;
         qDebug() << buffer.size();
 
-        static int cnt = 0;
-        // fill in the analogData vector array
-        for (int i=0;i<200;i++) {
-            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
-            avg[i] = std::accumulate(analogData[i].begin(),analogData[i].end(),QPointF(0,0)).y();
-            avg[i] /= (cnt+1);
-        }
-        cnt++;
-        // refresh all
-        for (QChartView* qcv : this->findChildren<QChartView*>()) {
-            auto q = (QSplineSeries*)qcv->chart()->series()[0];
-            q->replace(analogData[qcv->objectName().toInt()]);
-        }
-//        update avg
-        for(int i=0;i<5;i++){
-            for(int j=0;j<40;j++){
-                auto label_temp = qobject_cast<QLabel *>(tab_layouts[i]->itemAtPosition(j-20<0?j:j-20,j-20>=0?3:1)->widget());
-                label_temp->setText(QString("avg:  ").append(QString().setNum(avg[i*40+j])));
-            }
-        }
+//        static int cnt = 0;
+//        // fill in the analogData vector array
+//        for (int i=0;i<200;i++) {
+//            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
+//            avg[i] = std::accumulate(analogData[i].begin(),analogData[i].end(),QPointF(0,0)).y();
+//            avg[i] /= (cnt+1);
+//        }
+//        cnt++;
+
+//        // refresh all
+//        for (QChartView* qcv : this->findChildren<QChartView*>()) {
+//            auto q = (QSplineSeries*)qcv->chart()->series()[0];
+//            q->replace(analogData[qcv->objectName().toInt()-1]);
+//            if(cnt>xRange){
+//                qcv->chart()->axes(Qt::Horizontal)[0]->setRange(cnt-xRange, cnt);
+//            }
+//        }
+////        update avg
+//        for(int i=0;i<5;i++){
+//            for(int j=0;j<40;j++){
+//                auto label_temp = qobject_cast<QLabel *>(tab_layouts[i]->itemAtPosition(j-20<0?j:j-20,j-20>=0?3:1)->widget());
+//                label_temp->setText(QString("avg:  ").append(QString().setNum(avg[i*40+j])));
+//            }
+//        }
     }
 }
 
 
-void MainWindow::sendMessage(QString message)
+void MainWindow::sendMessage(QByteArray message)
 {
-    socket->write(message.toLatin1());
+    socket->write(message);
     socket->flush();
 }
 
@@ -116,5 +122,6 @@ void MainWindow::socket_Disconnected()
     //修改按键文字
     ui->pushButton_Connect->setText("连接");
     qDebug() << "disconnected！";
+    printToConsole("断开连接");
 }
 
