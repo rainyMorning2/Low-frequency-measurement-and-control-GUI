@@ -9,8 +9,8 @@
 #include <QtCharts/QSplineSeries>
 #include <QSettings>
 #include <QCheckBox>
-#include <QSaveFile>
 #include <QGridLayout>
+#include <QFileDialog>
 
 using namespace QtCharts;
 
@@ -70,7 +70,7 @@ private:
     int maxDisplay;
     int currentNum;
     QButtonGroup* checkGroup;
-    QVector<QPointF> analogData[200];
+    QVector<QVector<QPointF>> analogData;
     void analogInit();
     QChartView* addNewChart(int);
     QList<QGridLayout*> tab_layouts;

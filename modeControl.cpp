@@ -12,8 +12,6 @@ const int RESET = 3;
 /*
     //TODO
     1.finish save and load including auto save
-    2.finish control conmand
-    3. print2consle
 */
 
 void MainWindow::modeCtrlInit(){
@@ -98,28 +96,62 @@ void MainWindow::on_pushButton_stop_clicked()
 
 void MainWindow::on_pushButton_save_clicked()
 {
-    QFile file("file.dat");
-    file.open(QIODevice::WriteOnly);
-    QDataStream out(&file);   // we will serialize the data into the file
-    out << QString("the answer is");   // serialize a string
-    out << (qint32)42;        // serialize an integer
-    analogData[0].append(QPointF(2,3));
-    out << analogData;
+    //定义文件对话框类
+    QFileDialog *fileDialog = new QFileDialog(this);
+    //定义文件对话框标题
+    fileDialog->setWindowTitle(QStringLiteral("保存到"));
+    //设置默认文件路径
+    fileDialog->setDirectory(".");
+    //设置文件过滤器
+    fileDialog->setNameFilter(tr("File(*.dat)"));
+    //设置可以选择多个文件,默认为只能选择一个文件QFileDialog::ExistingFiles
+    fileDialog->setFileMode(QFileDialog::AnyFile);
+    //设置视图模式
+    fileDialog->setViewMode(QFileDialog::Detail);
+    //设置默认拓展名
+    fileDialog->setDefaultSuffix(".dat");
+    fileDialog->selectFile("file");
+    //打印所有选择的文件的路径
+    QStringList fileNames;
+    if (fileDialog->exec()) {
+        fileNames = fileDialog->selectedFiles();
+    }
+    if(!fileNames.isEmpty()){
+        QFile file(fileNames[0]);
+        file.open(QIODevice::WriteOnly);
+        QDataStream out(&file);   // we will serialize the data into the file
+        out << analogData;
+        printToConsole("成功保存到： "+fileNames[0]);
+    }
+
 
 }
 
 void MainWindow::on_pushButton_load_clicked()
 {
-    QFile file("file.dat");
-    file.open(QIODevice::ReadOnly);
-    QDataStream in(&file);    // read the data serialized from the file
-    QString str;
-    qint32 a;
-    QList<QVector<QPointF>> s;
-    in >> str >> a >> s;
-    qDebug()<<str;
-    qDebug()<<a;
-    qDebug()<<s;
+    //定义文件对话框类
+    QFileDialog *fileDialog = new QFileDialog(this);
+    //定义文件对话框标题
+    fileDialog->setWindowTitle(QStringLiteral("打开"));
+    //设置默认文件路径
+    fileDialog->setDirectory(".");
+    //设置文件过滤器
+    fileDialog->setNameFilter(tr("File(*.dat)"));
+    //设置可以选择多个文件,默认为只能选择一个文件QFileDialog::ExistingFiles
+    fileDialog->setFileMode(QFileDialog::ExistingFile);
+    //设置视图模式
+    fileDialog->setViewMode(QFileDialog::Detail);
+    //打印所有选择的文件的路径
+    QStringList fileNames;
+    if (fileDialog->exec()) {
+        fileNames = fileDialog->selectedFiles();
+    }
 
-
+    if(!fileNames.isEmpty()){
+        QFile file(fileNames[0]);
+        file.open(QIODevice::ReadOnly);
+        QDataStream in(&file);    // read the data serialized from the file
+        in >> analogData;
+        printToConsole("已成功载入："+fileNames[0]);
+    }
 }

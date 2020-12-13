@@ -7,7 +7,7 @@ void MainWindow::analogInit(){
     checkGroup = new QButtonGroup();
 
     for(int i=0;i<200;i++){
-        analogData[i] = QVector<QPointF>();
+        analogData.append(QVector<QPointF>());
     }
 
     checkGroup->setExclusive(false);

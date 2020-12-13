@@ -39,7 +39,7 @@ void MainWindow::on_pushButton_Connect_clicked()
         socket->connectToHost(IP, port);
 
         //等待连接成功
-        if(!socket->waitForConnected(30000))
+        if(!socket->waitForConnected(10000))
         {
             qDebug() << "Connection failed!";
             printToConsole("连接超时");
