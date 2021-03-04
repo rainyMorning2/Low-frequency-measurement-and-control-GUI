@@ -1,9 +1,17 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include <QtCharts/QValueAxis>
+#include <QtCharts/QSplineSeries>
+
+QStringList checkboxNames;
+QStringList tabNames;
 
 void MainWindow::analogInit(){
     currentNum = 0;
-    maxDisplay = settings->value("MaxDisplay").toInt();
+    xRange = settings->value("xRange").toInt();
+    maxDisplay = settings->value("maxDisplay").toInt();
+    checkboxNames = settings->value("checkboxNames").toStringList();
+    tabNames = settings->value("tabNames").toStringList();
     checkGroup = new QButtonGroup();
 
     for(int i=0;i<200;i++){
@@ -13,18 +21,12 @@ void MainWindow::analogInit(){
     checkGroup->setExclusive(false);
 
     for(int i=0;i<5;i++){
+        ui->tabWidget->setTabText(i,tabNames[i]);
         tab_layouts.append(new QGridLayout());
         for(int j=0;j<40;j++){
-            QString check_name;
-            if(i==0){
-                check_name = QString("高压通道 ").append(QString().setNum(i*40+j+1));
-            }else{
-                check_name = QString("低压通道 ").append(QString().setNum((i-1)*40+j+1));
-            }
-            QCheckBox* checkbox = new QCheckBox(check_name);
-            tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?2:0);
-            tab_layouts[i]->addWidget(new QLabel("avg: "),j-20<0?j:j-20,j-20>=0?3:1);
-            checkGroup->addButton(checkbox,i*40+j+1);
+            QCheckBox* checkbox = new QCheckBox(checkboxNames[i*40+j]);
+            tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?1:0);
+            checkGroup->addButton(checkbox,i*40+j);
         }
     }
 
@@ -33,6 +35,7 @@ void MainWindow::analogInit(){
     ui->tab_3->setLayout(tab_layouts[2]);
     ui->tab_4->setLayout(tab_layouts[3]);
     ui->tab_5->setLayout(tab_layouts[4]);
+    ui->tabWidget->setCurrentIndex(0);
 
     connect(checkGroup,SIGNAL(idToggled(int,bool)),this,SLOT(check(int,bool)));
 }
@@ -40,8 +43,6 @@ void MainWindow::analogInit(){
 
 void MainWindow::check(int id, bool checked)
 {
-
-
     if(checked){
         if(currentNum < maxDisplay){
             // add a new chart
@@ -49,7 +50,6 @@ void MainWindow::check(int id, bool checked)
             ui->verticalLayout->addWidget(qcv);
             ui->verticalLayout->setStretchFactor(qcv,1);
             currentNum++;
-
         }
     }else{
         QChartView* view = this->findChild<QChartView *>(QString::number(id));
@@ -83,18 +83,9 @@ void MainWindow::check(int id, bool checked)
 
 QChartView* MainWindow::addNewChart(int id){
 
-    QString title;
+    QString title = checkboxNames[id];
     int xRange = settings->value("xRange").toInt();;
-    int yRange;
-
-    // TODO
-    if(id <= 40){
-        title = QString("高压通道 ").append(QString::number(id));
-        yRange = 200;
-    }else{
-        title = QString("低压通道 ").append(QString::number(id-40));
-        yRange = 100;
-    }
+    int yRange = 100;
 
     QChartView* mChart = new QChartView();
     mChart->setEnabled(true);
@@ -126,9 +117,21 @@ QChartView* MainWindow::addNewChart(int id){
     spY1->setColor(QColor(255, 0, 0));
     spY1->setUseOpenGL();// 开启openGL加速
 
-    spY1->replace(analogData[id-1]);
+    spY1->replace(analogData[id]);
 
     return mChart;
+
+}
+
+void MainWindow::refreshChart(int cnt){
+    // refresh all
+    for (QChartView* qcv : this->findChildren<QChartView*>()) {
+        auto q = (QSplineSeries*)qcv->chart()->series()[0];
+        q->replace(analogData[qcv->objectName().toInt()]);
+        if(cnt>xRange){
+            qcv->chart()->axes(Qt::Horizontal)[0]->setRange(cnt-xRange, cnt);
+        }
+    }
 
 }
 

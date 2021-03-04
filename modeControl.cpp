@@ -2,16 +2,13 @@
 #include "ui_mainwindow.h"
 #include "chrono"
 #include "thread"
+#include <QFileDialog>
 
-const int SELFCHECK = 0;
-const int NORMAL = 1;
-const int HIGHSPEED = 2;
-const int RESET = 3;
-
+bool flag = false;
 
 /*
     //TODO
-    1.finish save and load including auto save
+    1.finish save and load
 */
 
 void MainWindow::modeCtrlInit(){
@@ -21,10 +18,12 @@ void MainWindow::modeCtrlInit(){
     buttonGroup->addButton(ui->radioButton_normal_mode,NORMAL);
     buttonGroup->addButton(ui->radioButton_selfcheck_mode,SELFCHECK);
     buttonGroup->addButton(ui->radioButton_reset_mode,RESET);
+    buttonGroup->addButton(ui->radioButton_selfcheck_en,SELFCHECK_EN);
 
     ui->lineEdit_high_speed_channel->setEnabled(false);
     ui->pushButton_start->setEnabled(false);
     ui->pushButton_stop->setEnabled(false);
+
 }
 
 
@@ -38,59 +37,107 @@ void MainWindow::on_pushButton_start_clicked()
     QByteArray mess;
     switch(buttonGroup->checkedId()){
         case RESET:
-//            mess = (QByteArray::fromHex("7A01E9"));
-            mess = (QByteArray::fromHex("E9017A"));
-            sendMessage(mess);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-//            mess = (QByteArray::fromHex("7A21E9"));
-            mess = (QByteArray::fromHex("E9217A"));
-//            sendMessage(mess);
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-//            mess = (QByteArray::fromHex("7A41E9"));
-            mess = (QByteArray::fromHex("E9417A"));
-//            sendMessage(mess);
+            if(flag){
+                sendMessage(QByteArray::fromHex("E9017A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9817A"));
+                flag = !flag;
+            }
+            currentMode = RESET;
+            isReset = true;
             break;
         case SELFCHECK:
+            if(flag){
+                sendMessage(QByteArray::fromHex("E9697A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9E97A"));
+                flag = !flag;
+            }
+            currentMode = SELFCHECK;
+            break;
+        case SELFCHECK_EN:
+            if(flag){
+                sendMessage(QByteArray::fromHex("E96B7A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9EB7A"));
+                flag = !flag;
+            }
+            currentMode = SELFCHECK_EN;
+            isSelfchecked = true;
             break;
         case NORMAL:
-//            mess = (QByteArray::fromHex("7A73E9"));
-            mess = (QByteArray::fromHex("E9737A"));
-            sendMessage(mess);
-            std::this_thread::sleep_for(std::chrono::nanoseconds(200));
-//            mess = (QByteArray::fromHex("7A33E9"));
-            mess = (QByteArray::fromHex("E9337A"));
-//            sendMessage(mess);
-            std::this_thread::sleep_for(std::chrono::nanoseconds(200));
-//            mess = (QByteArray::fromHex("7A53E9"));
-            mess = (QByteArray::fromHex("E9537A"));
-//            sendMessage(mess);
+            if(flag){
+                sendMessage(QByteArray::fromHex("E9737A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9F37A"));
+                flag = !flag;
+            }
+            currentMode = NORMAL;
             break;
         case HIGHSPEED:
-            if (ui->lineEdit_high_speed_channel->text()==""){
-                qDebug()<<"wrong !";
+        {
+            QByteArray channel = QByteArray::fromHex("00");
+            channel[0] = ui->lineEdit_high_speed_channel->text().toInt(nullptr,16);
+            if(true){ // whether a legal input
+                if(flag){
+                    sendMessage(channel + QByteArray::fromHex("7A7A"));
+                    flag = !flag;
+                }else{
+                    sendMessage(channel + QByteArray::fromHex("FA7A"));
+                    flag = !flag;
+                }
             }else{
-                qDebug()<<"yes !";
+                printToConsole("请输入合法的通道号");
             }
+            currentMode = HIGHSPEED;
             break;
+        }
         default:
-            qDebug()<<"nothing !";
+            printToConsole("请选择一个模式");
     }
+    emit stateChange();
 }
 
-void MainWindow::on_pushButton_stop_clicked()
-{
-    QByteArray mess;
-//    mess = (QByteArray::fromHex("7A75E9"));
-    mess = (QByteArray::fromHex("E9757A"));
-    sendMessage(mess);
-    std::this_thread::sleep_for(std::chrono::nanoseconds(200));
-//    mess = (QByteArray::fromHex("7A35E9"));
-    mess = (QByteArray::fromHex("E9357A"));
-//    sendMessage(mess);
-    std::this_thread::sleep_for(std::chrono::nanoseconds(200));
-//    mess = (QByteArray::fromHex("7A55E9"));
-    mess = (QByteArray::fromHex("E9557A"));
-//    sendMessage(mess);
+void MainWindow::on_pushButton_stop_clicked(){
+    switch(currentMode){
+        case SELFCHECK_EN:
+            if(flag){
+                sendMessage(QByteArray::fromHex("E96D7A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9ED7A"));
+                flag = !flag;
+            }
+            currentMode = IDLE;
+            break;
+        case NORMAL:
+            if(flag){
+                sendMessage(QByteArray::fromHex("E9757A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9F57A"));
+                flag = !flag;
+            }
+            currentMode = IDLE;
+            break;
+        case HIGHSPEED:
+            if(flag){
+                sendMessage(QByteArray::fromHex("E97D7A"));
+                flag = !flag;
+            }else{
+                sendMessage(QByteArray::fromHex("E9FD7A"));
+                flag = !flag;
+            }
+            currentMode = IDLE;
+            break;
+        default:
+            printToConsole("请选择一个模式");
+    }
+    emit stateChange();
 }
 
 

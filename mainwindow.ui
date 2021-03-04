@@ -32,34 +32,34 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>4</number>
         </property>
         <property name="documentMode">
          <bool>false</bool>
         </property>
         <widget class="QWidget" name="tab_1">
          <attribute name="title">
-          <string>高压通道</string>
+          <string/>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_2">
          <attribute name="title">
-          <string>低压通道1</string>
+          <string/>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_3">
          <attribute name="title">
-          <string>低压通道2</string>
+          <string/>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_4">
          <attribute name="title">
-          <string>低压通道3</string>
+          <string/>
          </attribute>
         </widget>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">
-          <string>低压通道4</string>
+          <string/>
          </attribute>
         </widget>
        </widget>
@@ -88,7 +88,11 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QTextBrowser" name="textBrowser_console"/>
+        <widget class="QTextBrowser" name="textBrowser_console">
+         <property name="contextMenuPolicy">
+          <enum>Qt::DefaultContextMenu</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -211,7 +215,14 @@
          <string>采样模式</string>
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
-         <item row="7" column="2">
+         <item row="0" column="1">
+          <widget class="QRadioButton" name="radioButton_reset_mode">
+           <property name="text">
+            <string>复位模式</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="2">
           <widget class="QPushButton" name="pushButton_stop">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -230,7 +241,7 @@
            </property>
           </widget>
          </item>
-         <item row="6" column="1">
+         <item row="8" column="1">
           <widget class="QRadioButton" name="radioButton_high_speed_mode">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -249,45 +260,7 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="2">
-          <widget class="QPushButton" name="pushButton_load">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>40</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>载入</string>
-           </property>
-          </widget>
-         </item>
-         <item row="8" column="1">
-          <widget class="QPushButton" name="pushButton_save">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>40</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>保存</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="1">
+         <item row="5" column="1">
           <widget class="QRadioButton" name="radioButton_normal_mode">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -306,7 +279,7 @@
            </property>
           </widget>
          </item>
-         <item row="7" column="1">
+         <item row="9" column="1">
           <widget class="QPushButton" name="pushButton_start">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -325,14 +298,45 @@
            </property>
           </widget>
          </item>
-         <item row="1" column="1">
-          <widget class="QRadioButton" name="radioButton_reset_mode">
+         <item row="10" column="1">
+          <widget class="QPushButton" name="pushButton_save">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>40</height>
+            </size>
+           </property>
            <property name="text">
-            <string>复位模式</string>
+            <string>保存</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="2">
+         <item row="10" column="2">
+          <widget class="QPushButton" name="pushButton_load">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>载入</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="2">
           <widget class="QLineEdit" name="lineEdit_high_speed_channel">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -348,7 +352,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="1">
+         <item row="1" column="1">
           <widget class="QRadioButton" name="radioButton_selfcheck_mode">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -367,6 +371,13 @@
            </property>
           </widget>
          </item>
+         <item row="4" column="1">
+          <widget class="QRadioButton" name="radioButton_selfcheck_en">
+           <property name="text">
+            <string>自检使能</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -377,7 +388,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_5">
          <item row="0" column="0">
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="label_rs422">
            <property name="text">
             <string>TextLabel</string>
            </property>
@@ -393,7 +404,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_6">
          <item row="0" column="0">
-          <widget class="QLabel" name="label_2">
+          <widget class="QLabel" name="label_state">
            <property name="text">
             <string>TextLabel</string>
            </property>

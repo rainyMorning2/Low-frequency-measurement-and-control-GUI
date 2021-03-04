@@ -5,12 +5,9 @@
 #include <QTcpSocket>
 #include <QButtonGroup>
 #include <QtCharts/QChartView>
-#include <QtCharts/QValueAxis>
-#include <QtCharts/QSplineSeries>
 #include <QSettings>
 #include <QCheckBox>
 #include <QGridLayout>
-#include <QFileDialog>
 
 using namespace QtCharts;
 
@@ -26,8 +23,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
+signals:
+    void stateChange();
 
+private slots:
+    void clearConsole();
     /*
      * tcp/ip connection
     */
@@ -46,17 +46,23 @@ private slots:
     void on_pushButton_stop_clicked();
     void check(int,bool);
 
+    /*
+     * statse display
+    */
+    void updateState();
+
 private:
     Ui::MainWindow *ui;
     QSettings* settings;
     void printToConsole(QString);
-
+//    void contextMenuEvent(QContextMenuEvent*);
     /*
      * tcp/ip connection
     */
     QTcpSocket* socket;
     void tcpInit();
     void sendMessage(QByteArray);
+    void parse_data(QByteArray);
 
     /*
      * mode control
@@ -69,14 +75,26 @@ private:
     */
     int maxDisplay;
     int currentNum;
+    int xRange;
     QButtonGroup* checkGroup;
     QVector<QVector<QPointF>> analogData;
+    QList<QGridLayout*> tab_layouts;
+
+
     void analogInit();
     QChartView* addNewChart(int);
-    QList<QGridLayout*> tab_layouts;
+    void refreshChart(int);
 
     /*
      * statse display
     */
+    void stateInit();
+    bool isConnected;
+    bool isReset;
+    bool isSelfchecked;
+    enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,RESET,SELFCHECK_EN,IDLE};
+    ModeList currentMode;
+
+
 };
 #endif // MAINWINDOW_H

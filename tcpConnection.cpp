@@ -8,6 +8,7 @@
     4.print2consle
 */
 
+static int disNum = 0;
 
 void MainWindow::tcpInit(){
     socket = new QTcpSocket();
@@ -17,7 +18,6 @@ void MainWindow::tcpInit(){
 
     ui->lineEdit_IP->setText(settings->value("IP").toString());
     ui->lineEdit_Port->setText(settings->value("port").toString());
-
 }
 
 
@@ -32,7 +32,6 @@ void MainWindow::on_pushButton_Connect_clicked()
         IP = ui->lineEdit_IP->text();
         //获取端口号
         port = ui->lineEdit_Port->text().toInt();
-
         //取消已有的连接
         socket->abort();
         //连接服务器
@@ -47,7 +46,8 @@ void MainWindow::on_pushButton_Connect_clicked()
         }
         qDebug() << "Connect successfully!";
         printToConsole("连接成功");
-
+        isConnected = true;
+        emit stateChange();
         //发送按键使能
         ui->pushButton_start->setEnabled(true);
         ui->pushButton_stop->setEnabled(true);
@@ -58,6 +58,8 @@ void MainWindow::on_pushButton_Connect_clicked()
     {
         //断开连接
         socket->disconnectFromHost();
+        isConnected = false;
+        emit stateChange();
         //修改按键文字
         ui->pushButton_Connect->setText("连接");
         ui->pushButton_start->setEnabled(false);
@@ -65,44 +67,60 @@ void MainWindow::on_pushButton_Connect_clicked()
     }
 }
 
+void MainWindow::parse_data(QByteArray buffer){
 
+    if(buffer.size()==1024 && disNum<5){
+        QDataStream data_stream(&buffer, QIODevice::ReadOnly);
+        data_stream.setByteOrder(QDataStream::LittleEndian);
+        quint32 data[256];
+        QString temp="";
+        for(int i=0;i<256;i++){
+            data_stream>>data[i];
+            temp += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
+            temp+=" ";
+            if((i+1)%8==0){
+                printToConsole(temp);
+                temp = "";
+            }
+        }
+        printToConsole(QString::number(buffer.size()));
+        disNum++;
+    }
+}
+
+// 4 Bytes reverse  
+// sent 1 2 3 4 
+// recieved 4 3 2 1 
+// total 1024B 
 void MainWindow::socket_Read_Data()
 {
     QByteArray buffer;
-    double avg[200];
-    int xRange = settings->value("xRange").toInt();
     //读取缓冲区数据
-    buffer = socket->readAll();
+    if(socket->bytesAvailable()>=1024){
+        buffer = socket->read(1024);
+    }else{
+        return;
+    }
+
     if(!buffer.isEmpty())
     {
         // 解析返回值，判断
-        qDebug() << buffer;
-        qDebug() << buffer.size();
+//        qDebug() << buffer;
+//        qDebug() << buffer.toHex();
+//        qDebug() << buffer.size();
+//        printToConsole(buffer.toHex());
 
 //        static int cnt = 0;
-//        // fill in the analogData vector array
+        // fill in the analogData vector array
+
+        parse_data(buffer);
+
 //        for (int i=0;i<200;i++) {
 //            analogData[i].append(QPointF(cnt,buffer[rand()%1024]));
-//            avg[i] = std::accumulate(analogData[i].begin(),analogData[i].end(),QPointF(0,0)).y();
-//            avg[i] /= (cnt+1);
 //        }
 //        cnt++;
 
-//        // refresh all
-//        for (QChartView* qcv : this->findChildren<QChartView*>()) {
-//            auto q = (QSplineSeries*)qcv->chart()->series()[0];
-//            q->replace(analogData[qcv->objectName().toInt()-1]);
-//            if(cnt>xRange){
-//                qcv->chart()->axes(Qt::Horizontal)[0]->setRange(cnt-xRange, cnt);
-//            }
-//        }
-////        update avg
-//        for(int i=0;i<5;i++){
-//            for(int j=0;j<40;j++){
-//                auto label_temp = qobject_cast<QLabel *>(tab_layouts[i]->itemAtPosition(j-20<0?j:j-20,j-20>=0?3:1)->widget());
-//                label_temp->setText(QString("avg:  ").append(QString().setNum(avg[i*40+j])));
-//            }
-//        }
+//        refreshChart(cnt);
     }
 }
 
@@ -123,5 +141,7 @@ void MainWindow::socket_Disconnected()
     ui->pushButton_Connect->setText("连接");
     qDebug() << "disconnected！";
     printToConsole("断开连接");
+    isConnected = false;
+    emit stateChange();
 }
 
