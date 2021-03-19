@@ -2,12 +2,15 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QTcpSocket>
 #include <QButtonGroup>
 #include <QtCharts/QChartView>
 #include <QSettings>
 #include <QCheckBox>
 #include <QGridLayout>
+#include <threadTcp.h>
+#include <QThread>
+#include <customtabwidget.h>
+#include <QDateTime>
 
 using namespace QtCharts;
 
@@ -25,15 +28,31 @@ public:
 
 signals:
     void stateChange();
+    void sig_connect(QString,int);
+    void sig_disconnect();
+    void sig_sendMessage(QByteArray);
 
 private slots:
     void clearConsole();
+    void printToConsole(QString);
+
+    /*
+     * analog display
+    */
+    void refreshAnalogData(quint32*);
+    void refreshChart();
+
+
     /*
      * tcp/ip connection
     */
+    void connectSucceed();
+    void connectFailed();
+    void disconnectSucceed();
     void on_pushButton_Connect_clicked();
-    void socket_Read_Data();
-    void socket_Disconnected();
+
+    void readPendingDatagrams();
+
 
     /*
      * mode control
@@ -47,43 +66,60 @@ private slots:
     void check(int,bool);
 
     /*
-     * statse display
+     * state display
     */
     void updateState();
 
 private:
     Ui::MainWindow *ui;
     QSettings* settings;
-    void printToConsole(QString);
-//    void contextMenuEvent(QContextMenuEvent*);
+    QThread* tcpWorkThread;
+
     /*
      * tcp/ip connection
     */
-    QTcpSocket* socket;
+    ThreadTcp* threadSocket;
     void tcpInit();
     void sendMessage(QByteArray);
     void parse_data(QByteArray);
 
+    void udpInit();
+
     /*
      * mode control
     */
-    QButtonGroup* buttonGroup;
+
     void modeCtrlInit();
+    void resetDataIndex();
+    bool isSaveEnabled;
+    QFile file;
+    QDataStream out;
+    int highSpeedChannel;
 
     /*
      * analog display
     */
-    int maxDisplay;
-    int currentNum;
+
     int xRange;
-    QButtonGroup* checkGroup;
+    bool* isOverflow;
+    double highTimeIndex;
+    int normalTimeIndex;
+
+    QDateTime begin;
+    QDateTime end;
     QVector<QVector<QPointF>> analogData;
-    QList<QGridLayout*> tab_layouts;
+    QVector<QPointF> highSpeedData;
+    QVector<char> rs422_1_data;
+    QVector<char> rs422_2_data;
+
+    void resortCharts(bool);
+    void checkWarningState();
+    void parseData(quint32*);
 
 
     void analogInit();
     QChartView* addNewChart(int);
-    void refreshChart(int);
+
 
     /*
      * statse display
@@ -92,8 +128,9 @@ private:
     bool isConnected;
     bool isReset;
     bool isSelfchecked;
-    enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,RESET,SELFCHECK_EN,IDLE};
+    enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,RESET,IDLE};
     ModeList currentMode;
+    ModeList lastMode;
 
 
 };

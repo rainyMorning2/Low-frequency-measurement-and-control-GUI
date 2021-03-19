@@ -12,14 +12,21 @@ CONFIG += c++11
 
 SOURCES += \
     analogDisplay.cpp \
+    customtab.cpp \
+    customtabwidget.cpp \
     main.cpp \
     mainwindow.cpp \
     modeControl.cpp \
     stateDisplay.cpp \
-    tcpConnection.cpp
+    tcpConnection.cpp \
+    threadTcp.cpp \
+    udpServer.cpp
 
 HEADERS += \
-    mainwindow.h
+    customtab.h \
+    customtabwidget.h \
+    mainwindow.h \
+    threadTcp.h
 
 FORMS += \
     mainwindow.ui
