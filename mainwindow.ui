@@ -48,7 +48,7 @@
        <item row="0" column="0">
         <widget class="QTextBrowser" name="textBrowser_console">
          <property name="contextMenuPolicy">
-          <enum>Qt::DefaultContextMenu</enum>
+          <enum>Qt::CustomContextMenu</enum>
          </property>
         </widget>
        </item>

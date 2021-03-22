@@ -19,12 +19,14 @@ QVector<QChartView*> inDisplay;
 QTimer chartUpdate;
 QList<QGridLayout*> tab_layouts;
 QButtonGroup* checkGroup;
+QMenu *myMenu;
 
 int timescale;
 double highTimescale;
 int maxDisplay;
 int *warningLimits;
 int *warningCnt;
+bool isDebug;
 
 void MainWindow::analogInit(){
     maxDisplay = 4;
@@ -37,6 +39,7 @@ void MainWindow::analogInit(){
     memset(warningCnt,0,5*sizeof(int));
     memset(isOverflow,0,200*sizeof(bool));
 
+    isDebug = settings->value("isDebug").toBool();
     xRange = settings->value("xRange").toInt();
     QVariant defaultLimit = settings->value("WarningLimit/default");
     checkboxNames = settings->value("checkboxNames").toStringList();
@@ -95,9 +98,23 @@ void MainWindow::analogInit(){
     VSplitter->setSizes(temp);
     ui->verticalLayout->addWidget(VSplitter);
 
+
+    myMenu = ui->textBrowser_console->createStandardContextMenu();
+    QAction *myAction = new QAction("Clear All",this);
+    connect(myAction,SIGNAL(triggered()),this,SLOT(clearConsole()));
+    myMenu->addAction(myAction);
+
     connect(checkGroup,SIGNAL(idToggled(int,bool)),this,SLOT(check(int,bool)));
     connect(&chartUpdate,SIGNAL(timeout()),this,SLOT(refreshChart()));
+    connect(ui->textBrowser_console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(createMenu(QPoint)));
+
 }
+
+void MainWindow::createMenu(QPoint){
+    myMenu->move (cursor().pos());
+    myMenu->show();
+}
+
 
 void MainWindow::resortCharts(bool isDel){
 
@@ -214,48 +231,43 @@ QChartView* MainWindow::addNewChart(int id){
 
 void MainWindow::refreshAnalogData(quint32* data){
 
-/*
- * print to console for test
- *
- * *
-*
-*/
-    QString temp0="";
-    for(int i=0;i<256;i++){
-        temp0 += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-        temp0+=" ";
-        if((i+1)%8==0){
-//            qDebug()<<(temp0);
-            printToConsole(temp0);
-            temp0 = "";
+    if(isDebug){
+        QString temp0;
+        for(int i=0;i<256;i++){
+            if(i%8==0){
+                temp0 += "\n";
+            }
+            temp0 += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
+            temp0+=" ";
         }
+        printToConsole(temp0);
     }
-//    qDebug()<<"";
-    printToConsole(temp0);
-
 
     // parse data into rs422 and analogData display
     parseData(data);
-//    //  warning
+    //  warning
     checkWarningState();
 
-    QString intData;
-    for(int i=0;i<200;i++){
-        if(i%10==0){
-            intData +="\n";
+    if(isDebug){
+        QString intData;
+        for(int i=0;i<200;i++){
+            if(i%10==0){
+                intData +="\n";
+            }
+            intData += QString::number(analogData[i].last().y());
+            intData += " ";
         }
-        intData += QString::number(analogData[i].last().y());
-        intData += " ";
+
+        for(int i=0;i<32;i++){
+            if(i%8==0){
+                intData+="\n";
+            }
+            intData += QString::number(highSpeedData[highSpeedData.size()-1-32+i].y());
+            intData += " ";
+        }
+        printToConsole(intData);
     }
 
-    for(int i=0;i<32;i++){
-        if(i%8==0){
-            intData+="\n";
-        }
-        intData += QString::number(highSpeedData[highSpeedData.size()-1-32+i].y());
-        intData += " ";
-    }
-    printToConsole(intData);
 }
 
 void MainWindow::parseData(quint32* data){

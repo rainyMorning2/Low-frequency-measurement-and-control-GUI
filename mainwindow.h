@@ -37,7 +37,7 @@ private slots:
     */
     void refreshAnalogData(quint32*);
     void refreshChart();
-
+    void createMenu(QPoint);
 
     /*
      * tcp/ip connection

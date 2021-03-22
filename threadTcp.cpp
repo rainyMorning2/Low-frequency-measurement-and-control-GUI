@@ -81,18 +81,18 @@ void ThreadTcp::updateAnalogData(){
 
     for(int i=0;i<256;i++){
         data_stream>>data[i];
-//        qDebug()<<QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-//        if(i==0){
-//            while((data[i]&0xFFFF0000) != 0x7E7E0000){
-//                data_stream>>data[i];
-//                qDebug()<<QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-//            }
-//        }
+        qDebug()<<QString("%1").arg(data[i],8,16,QLatin1Char('0'));
+        if(i==0){
+            while((data[i]&0xFFFF0000) != 0x7E7E0000){
+                data_stream>>data[i];
+                qDebug()<<QString("%1").arg(data[i],8,16,QLatin1Char('0'));
+            }
+        }
     }
 
-//    if((data[255]&0x0000FFFF) != 0x00001A1A){
-//        return;
-//    }
+    if((data[255]&0x0000FFFF) != 0x00001A1A){
+        return;
+    }
 
     qDebug()<<cnt<<" socket left"<<bytesAvailable();
     cnt++;
