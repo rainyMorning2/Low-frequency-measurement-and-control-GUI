@@ -3,6 +3,7 @@
 #include "chrono"
 #include "thread"
 #include <QFileDialog>
+#include <QButtonGroup>
 
 bool flag = false;
 QButtonGroup* buttonGroup;
@@ -20,9 +21,6 @@ void MainWindow::modeCtrlInit(){
     ui->pushButton_stop->setEnabled(false);
 
 }
-
-
-
 
 void MainWindow::on_radioButton_high_speed_mode_toggled(bool checked)
 {
@@ -57,7 +55,7 @@ void MainWindow::on_pushButton_start_clicked()
                 sendMessage(QByteArray::fromHex("E9E97A"));
                 flag = !flag;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
             if(flag){
                 sendMessage(QByteArray::fromHex("E96B7A"));
                 flag = !flag;

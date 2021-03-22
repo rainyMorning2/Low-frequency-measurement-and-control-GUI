@@ -9,8 +9,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
 
-    QString file;
-    file = QCoreApplication::applicationDirPath() + "/Config.ini";
+    QString file= QCoreApplication::applicationDirPath() + "/Config.ini";
     settings = new QSettings(file, QSettings::IniFormat);
     settings->setIniCodec("UTF8");
 

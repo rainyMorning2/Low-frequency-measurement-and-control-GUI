@@ -15,8 +15,6 @@ public:
 private:
     CustomTab* tb;
 
-signals:
-
 };
 
 #endif // CUSTOMTABWIDGET_H

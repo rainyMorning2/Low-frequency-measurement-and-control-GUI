@@ -1,5 +1,4 @@
 #include "customtabwidget.h"
-#include<QDebug>
 CustomTabWidget::CustomTabWidget(QWidget *parent,int num) : QTabWidget(parent)
 {
     tb = new CustomTab(this,num);

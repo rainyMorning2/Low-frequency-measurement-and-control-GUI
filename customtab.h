@@ -18,9 +18,6 @@ protected:
 private:
     QVector<bool> hasWarning;
 
-
-signals:
-
 };
 
 #endif // CUSTOMTAB_H

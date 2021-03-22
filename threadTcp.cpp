@@ -1,6 +1,8 @@
 #include "threadTcp.h"
 
 quint32* data;
+bool isStarted = false;
+
 ThreadTcp::ThreadTcp(int interval)
 {
     data_stream.setDevice(this);
@@ -16,7 +18,9 @@ ThreadTcp::ThreadTcp(int interval)
 
 
 ThreadTcp::~ThreadTcp(){
-
+    delete  timer;
+    delete []  data;
+    delete data;
 }
 
 
@@ -49,7 +53,7 @@ void ThreadTcp::send(QByteArray message){
 // sent 1 2 3 4
 // recieved 4 3 2 1
 // total 1024B
-bool isStarted = false;
+
 void ThreadTcp::socket_Read_Data()
 {
     //读取缓冲区数据

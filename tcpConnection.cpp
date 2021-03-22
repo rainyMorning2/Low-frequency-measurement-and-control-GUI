@@ -1,14 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <windows.h>
 #include "threadTcp.h"
 
-/*
-    //TODO
-    1.unpack data and store in analogData
-    3.aoto-save when buffer is full
-    4.print2consle
-*/
 
 void MainWindow::tcpInit(){
 

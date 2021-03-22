@@ -2,15 +2,11 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QButtonGroup>
 #include <QtCharts/QChartView>
 #include <QSettings>
-#include <QCheckBox>
-#include <QGridLayout>
-#include <threadTcp.h>
-#include <QThread>
-#include <customtabwidget.h>
 #include <QDateTime>
+#include <threadTcp.h>
+#include <customtabwidget.h>
 
 using namespace QtCharts;
 

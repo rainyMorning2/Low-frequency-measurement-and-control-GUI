@@ -1,5 +1,4 @@
 #include "customtab.h"
-#include<QDebug>
 CustomTab::CustomTab(QWidget *parent,int num) : QTabBar(parent)
 {
     for(int i=0;i<num;i++){
