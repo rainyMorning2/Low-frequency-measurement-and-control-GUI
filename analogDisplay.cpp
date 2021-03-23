@@ -27,6 +27,7 @@ int maxDisplay;
 int *warningLimits;
 int *warningCnt;
 bool isDebug;
+int debugCnt;
 
 void MainWindow::analogInit(){
     maxDisplay = 4;
@@ -40,6 +41,7 @@ void MainWindow::analogInit(){
     memset(isOverflow,0,200*sizeof(bool));
 
     isDebug = settings->value("isDebug").toBool();
+    debugCnt = settings->value("debugCnt").toInt();
     xRange = settings->value("xRange").toInt();
     QVariant defaultLimit = settings->value("WarningLimit/default");
     checkboxNames = settings->value("checkboxNames").toStringList();
@@ -230,8 +232,8 @@ QChartView* MainWindow::addNewChart(int id){
 }
 
 void MainWindow::refreshAnalogData(quint32* data){
-
-    if(isDebug){
+    static int cnt = 0;
+    if(isDebug && cnt==debugCnt){
         QString temp0;
         for(int i=0;i<256;i++){
             if(i%8==0){
@@ -248,7 +250,7 @@ void MainWindow::refreshAnalogData(quint32* data){
     //  warning
     checkWarningState();
 
-    if(isDebug){
+    if(isDebug && cnt==debugCnt){
         QString intData;
         for(int i=0;i<200;i++){
             if(i%10==0){
@@ -257,7 +259,7 @@ void MainWindow::refreshAnalogData(quint32* data){
             intData += QString::number(analogData[i].last().y());
             intData += " ";
         }
-
+        intData += "\n";
         for(int i=0;i<32;i++){
             if(i%8==0){
                 intData+="\n";
@@ -266,6 +268,11 @@ void MainWindow::refreshAnalogData(quint32* data){
             intData += " ";
         }
         printToConsole(intData);
+        cnt = 0;
+    }
+
+    if(isDebug){
+        cnt++;
     }
 
 }
