@@ -24,10 +24,14 @@ QMenu *myMenu;
 int timescale;
 double highTimescale;
 int maxDisplay;
-int *warningLimits;
+double *warningLimitsLow;
+double *warningLimitsHigh;
 int *warningCnt;
 bool isDebug;
 int debugCnt;
+bool packageEnable;
+bool normalEnable;
+bool highspeedEnable;
 
 void MainWindow::analogInit(){
     maxDisplay = 4;
@@ -40,8 +44,12 @@ void MainWindow::analogInit(){
     memset(warningCnt,0,5*sizeof(int));
     memset(isOverflow,0,200*sizeof(bool));
 
-    isDebug = settings->value("isDebug").toBool();
-    debugCnt = settings->value("debugCnt").toInt();
+    isDebug = settings->value("DebugMode/isDebug").toBool();
+    debugCnt = settings->value("DebugMode/debugCnt").toInt();
+    packageEnable = settings->value("DebugMode/packageEnable").toBool();
+    normalEnable = settings->value("DebugMode/normalEnable").toBool();
+    highspeedEnable =settings->value("DebugMode/highspeedEnable").toBool();
+
     xRange = settings->value("xRange").toInt();
     QVariant defaultLimit = settings->value("WarningLimit/default");
     checkboxNames = settings->value("checkboxNames").toStringList();
@@ -55,7 +63,8 @@ void MainWindow::analogInit(){
     end = end.addSecs(16*60*60);
 
     checkGroup = new QButtonGroup();
-    warningLimits = new int[200];
+    warningLimitsLow = new double[200];
+    warningLimitsHigh = new double[200];
     ctb= new CustomTabWidget(this,5);
     QWidget *vw = new QWidget();
     vlayout = new QGridLayout(vw);
@@ -66,7 +75,9 @@ void MainWindow::analogInit(){
         tab_layouts.append(new QGridLayout());
         for(int j=0;j<40;j++){
             analogData.append(QVector<QPointF>());
-            warningLimits[i*40+j] = settings->value(QString("WarningLimit/index%1").arg(i*40+j+1), defaultLimit).toInt();
+            QList<QVariant> limits = settings->value(QString("WarningLimit/index%1").arg(i*40+j+1), defaultLimit).toList();
+            warningLimitsLow[i*40+j] = limits[0].toDouble();
+            warningLimitsHigh[i*40+j] = limits[1].toDouble();
             QCheckBox* checkbox = new QCheckBox(checkboxNames[i*40+j]);
             tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?1:0);
             checkGroup->addButton(checkbox,i*40+j);
@@ -233,7 +244,7 @@ QChartView* MainWindow::addNewChart(int id){
 
 void MainWindow::refreshAnalogData(quint32* data){
     static int cnt = 0;
-    if(isDebug && cnt==debugCnt){
+    if(isDebug && cnt==debugCnt && packageEnable){
         QString temp0;
         for(int i=0;i<256;i++){
             if(i%8==0){
@@ -252,22 +263,32 @@ void MainWindow::refreshAnalogData(quint32* data){
 
     if(isDebug && cnt==debugCnt){
         QString intData;
-        for(int i=0;i<200;i++){
-            if(i%10==0){
-                intData +="\n";
+
+        if(normalEnable){
+            for(int i=0;i<200;i++){
+                if(i%10==0){
+                    intData +="\n";
+                }
+                intData += QString::number(analogData[i].last().y());
+                intData += " ";
             }
-            intData += QString::number(analogData[i].last().y());
-            intData += " ";
+            intData += "\n";
         }
-        intData += "\n";
-        for(int i=0;i<32;i++){
-            if(i%8==0){
-                intData+="\n";
+
+        if(highspeedEnable){
+            for(int i=0;i<32;i++){
+                if(i%8==0){
+                    intData+="\n";
+                }
+                intData += QString::number(highSpeedData[highSpeedData.size()-1-32+i].y());
+                intData += " ";
             }
-            intData += QString::number(highSpeedData[highSpeedData.size()-1-32+i].y());
-            intData += " ";
         }
-        printToConsole(intData);
+
+        if(normalEnable || highspeedEnable){
+            printToConsole(intData);
+        }
+
         cnt = 0;
     }
 
@@ -316,16 +337,11 @@ void MainWindow::parseData(quint32* data){
             rs422_2_data.append(data[i]>>24);
             rs422_2_data.append(data[i]>>16);
         }else if(i%8==5 || i%8==6 || (i<=71 && i%8==7)){ // normal
-//            QString temp = QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-//            qDebug()<<  temp;
-
             analogData[channelIndex].append((QPointF(normalTimeIndex,data[i]>>16)));
             channelIndex++;
-//            qDebug() <<"channel "<< (anaIndex+1) <<" : "<<(data[i]>>16);
 
             analogData[channelIndex].append((QPointF(normalTimeIndex,data[i]&0x0000FFFF)));
             channelIndex++;
-//            qDebug() <<"channel "<< (anaIndex+1) <<" : "<<(data[i]&0x0000FFFF);
         }else if(i>72 && i%8==7){
             analogData[channelIndex].append((QPointF(normalTimeIndex,data[i]>>16)));
             channelIndex++;
@@ -340,7 +356,8 @@ void MainWindow::checkWarningState(){
     for(int i=0;i<200;i++){
         if((currentMode == HIGHSPEED || (lastMode== HIGHSPEED && currentMode==IDLE )) && highSpeedChannel==i+1){
             for(int j=highSpeedData.size()-32;j<32;j++){
-                if(highSpeedData[j].y() >= warningLimits[i] && !isOverflow[i]){
+
+                if((highSpeedData[j].y() < warningLimitsLow[i] || highSpeedData[j].y() >= warningLimitsHigh[i]) && !isOverflow[i]){
                     isOverflow[i] = true;
                     checkGroup->button(i)->setStyleSheet("QCheckBox {background-color:rgb(249,244,0);}");
                     ctb->setWaringState(i/40,true);
@@ -348,7 +365,7 @@ void MainWindow::checkWarningState(){
                     printToConsole(QString("警告：%1 超出阈值！").arg(checkboxNames[i]));
                 }
 
-                if(highSpeedData[j].y() < warningLimits[i] && isOverflow[i]){
+                if(highSpeedData[j].y() >= warningLimitsLow[i] && highSpeedData[j].y() < warningLimitsHigh[i] && isOverflow[i]){
                     isOverflow[i] = false;
                     checkGroup->button(i)->setStyleSheet("QCheckBox {background-color:rgb(255,255,255);}");
                     warningCnt[i/40]--;
@@ -363,7 +380,7 @@ void MainWindow::checkWarningState(){
             continue;
         }
 
-        if(analogData[i].last().y() >= warningLimits[i] && !isOverflow[i]){
+        if((analogData[i].last().y() < warningLimitsLow[i] || analogData[i].last().y() >= warningLimitsHigh[i]) && !isOverflow[i]){
             isOverflow[i] = true;
             checkGroup->button(i)->setStyleSheet("QCheckBox {background-color:rgb(249,244,0);}");
             ctb->setWaringState(i/40,true);
@@ -371,7 +388,7 @@ void MainWindow::checkWarningState(){
             printToConsole(QString("警告：%1 超出阈值！").arg(checkboxNames[i]));
         }
 
-        if(analogData[i].last().y() < warningLimits[i] && isOverflow[i]){
+        if(analogData[i].last().y() >= warningLimitsLow[i] && analogData[i].last().y() < warningLimitsHigh[i] && isOverflow[i]){
             isOverflow[i] = false;
             checkGroup->button(i)->setStyleSheet("QCheckBox {background-color:rgb(255,255,255);}");
             warningCnt[i/40]--;
