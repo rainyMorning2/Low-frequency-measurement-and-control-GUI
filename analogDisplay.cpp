@@ -32,6 +32,7 @@ int debugCnt;
 bool packageEnable;
 bool normalEnable;
 bool highspeedEnable;
+bool valueLabelEnable;
 
 void MainWindow::analogInit(){
     maxDisplay = 4;
@@ -49,6 +50,7 @@ void MainWindow::analogInit(){
     packageEnable = settings->value("DebugMode/packageEnable").toBool();
     normalEnable = settings->value("DebugMode/normalEnable").toBool();
     highspeedEnable =settings->value("DebugMode/highspeedEnable").toBool();
+    valueLabelEnable = settings->value("DebugMode/valueLabelEnable").toBool();
 
     xRange = settings->value("xRange").toInt();
     QVariant defaultLimit = settings->value("WarningLimit/default");
@@ -79,7 +81,12 @@ void MainWindow::analogInit(){
             warningLimitsLow[i*40+j] = limits[0].toDouble();
             warningLimitsHigh[i*40+j] = limits[1].toDouble();
             QCheckBox* checkbox = new QCheckBox(checkboxNames[i*40+j]);
-            tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?1:0);
+            if(isDebug && valueLabelEnable){
+                tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?2:0);
+                tab_layouts[i]->addWidget(new QLabel("value: "),j-20<0?j:j-20,j-20>=0?3:1);
+            }else{
+                tab_layouts[i]->addWidget(checkbox,j-20<0?j:j-20,j-20>=0?1:0);
+            }
             checkGroup->addButton(checkbox,i*40+j);
         }
 
@@ -113,7 +120,7 @@ void MainWindow::analogInit(){
 
 
     myMenu = ui->textBrowser_console->createStandardContextMenu();
-    QAction *myAction = new QAction("Clear All",this);
+    QAction *myAction = new QAction("Clear All",myMenu);
     connect(myAction,SIGNAL(triggered()),this,SLOT(clearConsole()));
     myMenu->addAction(myAction);
 
@@ -124,10 +131,9 @@ void MainWindow::analogInit(){
 }
 
 void MainWindow::createMenu(QPoint){
-    myMenu->move (cursor().pos());
+    myMenu->move(cursor().pos());
     myMenu->show();
 }
-
 
 void MainWindow::resortCharts(bool isDel){
 
@@ -243,18 +249,9 @@ QChartView* MainWindow::addNewChart(int id){
 }
 
 void MainWindow::refreshAnalogData(quint32* data){
+
     static int cnt = 0;
-    if(isDebug && cnt==debugCnt && packageEnable){
-        QString temp0;
-        for(int i=0;i<256;i++){
-            if(i%8==0){
-                temp0 += "\n";
-            }
-            temp0 += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-            temp0+=" ";
-        }
-        printToConsole(temp0);
-    }
+    QString intData;
 
     // parse data into rs422 and analogData display
     parseData(data);
@@ -262,7 +259,18 @@ void MainWindow::refreshAnalogData(quint32* data){
     checkWarningState();
 
     if(isDebug && cnt==debugCnt){
-        QString intData;
+
+        if(packageEnable){
+            QString temp0;
+            for(int i=0;i<256;i++){
+                if(i%8==0){
+                    temp0 += "\n";
+                }
+                temp0 += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
+                temp0+=" ";
+            }
+            printToConsole(temp0);
+        }
 
         if(normalEnable){
             for(int i=0;i<200;i++){
@@ -289,7 +297,18 @@ void MainWindow::refreshAnalogData(quint32* data){
             printToConsole(intData);
         }
 
+
+        if(valueLabelEnable){
+            for(int i=0;i<5;i++){
+                for(int j=0;j<40;j++){
+                    auto label_temp = qobject_cast<QLabel *>(tab_layouts[i]->itemAtPosition(j-20<0?j:j-20,j-20>=0?3:1)->widget());
+                    label_temp->setText(QString("avg:  ").append(QString().setNum(analogData[i*40+j].last().y())));
+                }
+            }
+        }
+
         cnt = 0;
+
     }
 
     if(isDebug){

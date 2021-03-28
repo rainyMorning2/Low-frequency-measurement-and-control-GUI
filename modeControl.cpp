@@ -19,6 +19,7 @@ void MainWindow::modeCtrlInit(){
     ui->lineEdit_high_speed_channel->setEnabled(false);
     ui->pushButton_start->setEnabled(false);
     ui->pushButton_stop->setEnabled(false);
+    ui->comboBox->setEditable(true);
 
 }
 
@@ -151,8 +152,14 @@ void MainWindow::on_pushButton_save_clicked()
 {
     QString static filename;
     if(ui->pushButton_save->text()=="保存"){
-        filename = QTime::currentTime().toString("hh_mm_ss") + ".dat";
-        file.setFileName(filename);
+        filename = ui->comboBox->currentText();
+        if(!filename.isEmpty()){
+            file.setFileName(filename);
+        }else{
+            on_toolButton_clicked();
+            return;
+        }
+
         file.open(QIODevice::WriteOnly);
         out.setDevice(&file);
         isSaveEnabled = true;
@@ -199,4 +206,25 @@ void MainWindow::on_pushButton_load_clicked()
         checkWarningState();
         printToConsole("已成功载入："+fileNames[0]);
     }
+}
+
+void MainWindow::on_toolButton_clicked()
+{
+    QFileDialog *fileDialog = new QFileDialog(this);
+    fileDialog->setWindowTitle(QStringLiteral("保存到"));
+    fileDialog->setNameFilter(tr("File(*.dat)"));
+    fileDialog->setFileMode(QFileDialog::AnyFile);
+    fileDialog->setViewMode(QFileDialog::Detail);
+    QStringList fileNames;
+    if (fileDialog->exec()) {
+        fileNames = fileDialog->selectedFiles();
+    }
+
+    if(!fileNames.isEmpty()){
+         if(ui->comboBox->findText(fileNames[0])==-1){
+             ui->comboBox->addItem(fileNames[0]);
+         }
+         ui->comboBox->setCurrentIndex(ui->comboBox->findText(fileNames[0]));
+    }
+
 }

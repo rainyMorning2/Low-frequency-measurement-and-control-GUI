@@ -60,6 +60,7 @@ private slots:
     void on_pushButton_load_clicked();
     void on_pushButton_stop_clicked();
     void check(int,bool);
+    void on_toolButton_clicked();
 
     /*
      * state display
