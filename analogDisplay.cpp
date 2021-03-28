@@ -19,7 +19,6 @@ QVector<QChartView*> inDisplay;
 QTimer chartUpdate;
 QList<QGridLayout*> tab_layouts;
 QButtonGroup* checkGroup;
-QMenu *myMenu;
 
 int timescale;
 double highTimescale;
@@ -118,21 +117,8 @@ void MainWindow::analogInit(){
     VSplitter->setSizes(temp);
     ui->verticalLayout->addWidget(VSplitter);
 
-
-    myMenu = ui->textBrowser_console->createStandardContextMenu();
-    QAction *myAction = new QAction("Clear All",myMenu);
-    connect(myAction,SIGNAL(triggered()),this,SLOT(clearConsole()));
-    myMenu->addAction(myAction);
-
     connect(checkGroup,SIGNAL(idToggled(int,bool)),this,SLOT(check(int,bool)));
     connect(&chartUpdate,SIGNAL(timeout()),this,SLOT(refreshChart()));
-    connect(ui->textBrowser_console, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(createMenu(QPoint)));
-
-}
-
-void MainWindow::createMenu(QPoint){
-    myMenu->move(cursor().pos());
-    myMenu->show();
 }
 
 void MainWindow::resortCharts(bool isDel){

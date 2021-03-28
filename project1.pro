@@ -14,6 +14,7 @@ SOURCES += \
     analogDisplay.cpp \
     customtab.cpp \
     customtabwidget.cpp \
+    customtext.cpp \
     main.cpp \
     mainwindow.cpp \
     modeControl.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 HEADERS += \
     customtab.h \
     customtabwidget.h \
+    customtext.h \
     mainwindow.h \
     threadTcp.h
 

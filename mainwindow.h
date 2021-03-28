@@ -29,7 +29,6 @@ signals:
     void sig_sendMessage(QByteArray);
 
 private slots:
-    void clearConsole();
     void printToConsole(QString);
 
     /*
@@ -37,7 +36,6 @@ private slots:
     */
     void refreshAnalogData(quint32*);
     void refreshChart();
-    void createMenu(QPoint);
 
     /*
      * tcp/ip connection

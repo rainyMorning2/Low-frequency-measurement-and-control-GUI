@@ -29,8 +29,3 @@ MainWindow::~MainWindow()
 void MainWindow::printToConsole(QString mess){
     ui->textBrowser_console->append(QTime::currentTime().toString()+" "+mess);
 }
-
-void MainWindow::clearConsole(){
-    ui->textBrowser_console->clear();
-}
-

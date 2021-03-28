@@ -46,9 +46,9 @@
         <number>0</number>
        </property>
        <item row="0" column="0">
-        <widget class="QTextBrowser" name="textBrowser_console">
+        <widget class="customText" name="textBrowser_console">
          <property name="contextMenuPolicy">
-          <enum>Qt::CustomContextMenu</enum>
+          <enum>Qt::DefaultContextMenu</enum>
          </property>
         </widget>
        </item>
@@ -484,6 +484,13 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>customText</class>
+   <extends>QTextBrowser</extends>
+   <header>customtext.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
