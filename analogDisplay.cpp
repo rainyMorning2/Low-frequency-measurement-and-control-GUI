@@ -237,7 +237,7 @@ QChartView* MainWindow::addNewChart(int id){
 void MainWindow::refreshAnalogData(quint32* data){
 
     static int cnt = 0;
-    QString intData;
+    QString tempData="\n";
 
     // parse data into rs422 and analogData display
     parseData(data);
@@ -247,40 +247,42 @@ void MainWindow::refreshAnalogData(quint32* data){
     if(isDebug && cnt==debugCnt){
 
         if(packageEnable){
-            QString temp0;
+            tempData += "package:";
             for(int i=0;i<256;i++){
                 if(i%8==0){
-                    temp0 += "\n";
+                    tempData += "\n";
                 }
-                temp0 += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-                temp0+=" ";
+                tempData += QString("%1").arg(data[i],8,16,QLatin1Char('0'));
+                tempData+=" ";
             }
-            printToConsole(temp0);
+            tempData+="\n";
         }
 
         if(normalEnable){
+            tempData += "normal:";
             for(int i=0;i<200;i++){
                 if(i%10==0){
-                    intData +="\n";
+                    tempData +="\n";
                 }
-                intData += QString::number(analogData[i].last().y());
-                intData += " ";
+                tempData += QString::number(analogData[i].last().y());
+                tempData += " ";
             }
-            intData += "\n";
+            tempData += "\n";
         }
 
-        if(highspeedEnable){
+        if(highspeedEnable && (currentMode == HIGHSPEED || (lastMode== HIGHSPEED && currentMode==IDLE ))){
+            tempData += "highspeed:";
             for(int i=0;i<32;i++){
                 if(i%8==0){
-                    intData+="\n";
+                    tempData+="\n";
                 }
-                intData += QString::number(highSpeedData[highSpeedData.size()-1-32+i].y());
-                intData += " ";
+                tempData += QString::number(highSpeedData[highSpeedData.size()-1-32+i].y());
+                tempData += " ";
             }
         }
 
-        if(normalEnable || highspeedEnable){
-            printToConsole(intData);
+        if(packageEnable || normalEnable || highspeedEnable){
+            printToConsole(tempData);
         }
 
 
