@@ -104,12 +104,13 @@ private:
     QDateTime end;
     QVector<QVector<QPointF>> analogData;
     QVector<QPointF> highSpeedData;
-    QVector<char> rs422_1_data;
-    QVector<char> rs422_2_data;
+    QVector<unsigned char> rs422_1_data;
+    QVector<unsigned char> rs422_2_data;
 
     void resortCharts(bool);
     void checkWarningState();
     void parseData(quint32*);
+    double data2Voltage(quint32, int);
 
 
     void analogInit();
