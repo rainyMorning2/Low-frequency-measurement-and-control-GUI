@@ -26,6 +26,7 @@ int maxDisplay;
 double *warningLimitsLow;
 double *warningLimitsHigh;
 int *warningCnt;
+bool warningEnable;
 bool isDebug;
 int debugCnt;
 bool packageEnable;
@@ -63,6 +64,7 @@ void MainWindow::analogInit(){
     highspeedEnable =settings->value("DebugMode/highspeedEnable").toBool();
     valueLabelEnable = settings->value("DebugMode/valueLabelEnable").toBool();
     rs422Enable = settings->value("DebugMode/rs422Enable").toBool();
+    warningEnable = settings->value("DebugMode/warningEnable").toBool();
 
     xRange = settings->value("xRange").toInt();
     QVariant defaultLimit = settings->value("WarningLimit/default");
@@ -70,7 +72,7 @@ void MainWindow::analogInit(){
     checkboxNames = settings->value("checkboxNames").toStringList();
     tabNames = settings->value("tabNames").toStringList();
     timescale = settings->value("timescale").toInt();
-    highTimescale = timescale/32.0;
+    highTimescale = timescale/34.0;
 
     begin.setMSecsSinceEpoch(0);
     begin = begin.addSecs(16*60*60);
@@ -233,6 +235,7 @@ QChartView* MainWindow::addNewChart(int id){
     QDateTimeAxis* vaX = new QDateTimeAxis();
     QValueAxis* vaY1 = new QValueAxis();
     QSplineSeries* spY1 = new QSplineSeries();
+//    QScatterSeries* spY1 = new QScatterSeries();
 
     vaX->setFormat("hh:mm:ss.zzz");
     vaX->setRange(begin,end);
@@ -268,7 +271,10 @@ void MainWindow::refreshAnalogData(quint32* data){
     // parse data into rs422 and analogData display
     parseData(data);
     //  warning
-    //checkWarningState();
+    if(warningEnable){
+        checkWarningState();
+    }
+
 
     if(isDebug && cnt==debugCnt){
 
@@ -368,7 +374,9 @@ void MainWindow::parseData(quint32* data){
             out<<data[i];
         }
 
-        if(i%8==0){// normal and 422_1
+        if(i==255 || i==254){
+            continue;
+        }else if(i%8==0){// normal and 422_1
             if(i!=0){
                 analogData[channelIndex].append((QPointF(normalTimeIndex,data2Voltage(data[i]>>16,channelIndex))));
                 channelIndex++;
@@ -398,13 +406,17 @@ void MainWindow::parseData(quint32* data){
             }
             rs422_2_data.append(data[i]>>24);
             rs422_2_data.append(data[i]>>16);
-        }else if(i%8==5 || i%8==6 || (i<=71 && i%8==7)){ // normal
+        }else if(i%8==5 || i%8==6 || ((i<=71||i==247||i==239||i==231) && i%8==7)){ // normal
             analogData[channelIndex].append((QPointF(normalTimeIndex,data2Voltage(data[i]>>16,channelIndex))));
             channelIndex++;
 
             analogData[channelIndex].append((QPointF(normalTimeIndex,data2Voltage(data[i]&0x0000FFFF,channelIndex))));
             channelIndex++;
         }else if(i>72 && i%8==7){
+            if((i==79 || i==87) && (currentMode == HIGHSPEED || (lastMode== HIGHSPEED && currentMode==IDLE))){
+                highSpeedData.append(QPointF(highTimeIndex,data2Voltage(data[i]&0x0000FFFF,OUT2INLUT[highSpeedChannel])));
+                highTimeIndex += highTimescale;
+            }
             analogData[channelIndex].append((QPointF(normalTimeIndex,data2Voltage(data[i]>>16,channelIndex))));
             channelIndex++;
         }
@@ -486,6 +498,7 @@ void MainWindow::refreshChart(){
 
     for (int i=0;i<inDisplay.size();i++) {
         auto q = (QSplineSeries*)inDisplay[i]->chart()->series()[0];
+//        auto q = (QScatterSeries*)inDisplay[i]->chart()->series()[0];
         if((currentMode == HIGHSPEED || (lastMode== HIGHSPEED && currentMode==IDLE )) && inDisplay[i]->objectName().toInt()+1==highSpeedChannel){
             q->replace(highSpeedData);
         }else{
@@ -519,6 +532,7 @@ void MainWindow::resetDataIndex(){
 
     for (int i=0;i<inDisplay.size();i++) {
         auto q = (QSplineSeries*)inDisplay[i]->chart()->series()[0];
+//        auto q = (QScatterSeries*)inDisplay[i]->chart()->series()[0];
         if((currentMode == HIGHSPEED || (lastMode== HIGHSPEED && currentMode==IDLE )) && inDisplay[i]->objectName().toInt()+1==highSpeedChannel){
             q->replace(highSpeedData);
         }else{
