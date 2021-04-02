@@ -106,7 +106,6 @@ void MainWindow::on_pushButton_start_clicked()
 }
 
 void MainWindow::on_pushButton_stop_clicked(){
-    qDebug()<<analogData[0].size();
     switch(currentMode){
         case SELFCHECK:
             if(flag){
