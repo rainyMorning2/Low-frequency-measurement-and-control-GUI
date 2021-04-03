@@ -2,13 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtCharts/QChartView>
 #include <QSettings>
-#include <QDateTime>
 #include <threadTcp.h>
 #include <customtabwidget.h>
-
-using namespace QtCharts;
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -98,23 +95,16 @@ private:
     int xRange;
     bool* isOverflow;
     double highTimeIndex;
-    int normalTimeIndex;
-
-    QDateTime begin;
-    QDateTime end;
-    QVector<QVector<QPointF>> analogData;
-    QVector<QPointF> highSpeedData;
-    QVector<unsigned char> rs422_1_data;
-    QVector<unsigned char> rs422_2_data;
+    double normalTimeIndex;
 
     void resortCharts(bool);
     void checkWarningState();
     void parseData(quint32*);
     double data2Voltage(quint32, int);
-
+    void changeToHighspeedData();
 
     void analogInit();
-    QChartView* addNewChart(int);
+    QCustomPlot* addNewChart(int);
 
 
     /*

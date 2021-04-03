@@ -1,13 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "chrono"
-#include "thread"
 #include <QFileDialog>
 #include <QButtonGroup>
 
 bool flag = false;
 QButtonGroup* buttonGroup;
-
 void MainWindow::modeCtrlInit(){
 
     buttonGroup = new QButtonGroup();
@@ -20,7 +17,6 @@ void MainWindow::modeCtrlInit(){
     ui->pushButton_start->setEnabled(false);
     ui->pushButton_stop->setEnabled(false);
     ui->comboBox->setEditable(true);
-
 }
 
 void MainWindow::on_radioButton_high_speed_mode_toggled(bool checked)
@@ -94,8 +90,9 @@ void MainWindow::on_pushButton_start_clicked()
                 }
                 lastMode = currentMode;
                 currentMode = HIGHSPEED;
+                changeToHighspeedData();
             }else{
-                printToConsole("请输入合法的通道号");
+                printToConsole("请输入合法的通道号(1~200)");
             }
             break;
         }

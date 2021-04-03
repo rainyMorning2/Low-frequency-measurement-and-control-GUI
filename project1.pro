@@ -2,9 +2,10 @@ QT       += core gui
 QT       += charts
 QT       += network
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++11
+DEFINES += QCUSTOMPLOT_USE_OPENGL
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -18,6 +19,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     modeControl.cpp \
+    qcustomplot.cpp \
     stateDisplay.cpp \
     tcpConnection.cpp \
     threadTcp.cpp \
@@ -28,6 +30,7 @@ HEADERS += \
     customtabwidget.h \
     customtext.h \
     mainwindow.h \
+    qcustomplot.h \
     threadTcp.h
 
 FORMS += \
@@ -40,3 +43,6 @@ TRANSLATIONS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+win32:LIBS += -lOpengl32
+-lglu32
+unix:LIBS += -lglut -lGLU
