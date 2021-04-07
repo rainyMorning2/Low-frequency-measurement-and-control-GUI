@@ -164,7 +164,7 @@ void MainWindow::on_pushButton_save_clicked()
         file.close();
         isSaveEnabled = false;
         ui->pushButton_save->setText("保存");
-        printToConsole("成功保存到： "+ filename);
+        printToConsole("成功保存到："+ filename);
     }
 }
 
@@ -200,7 +200,7 @@ void MainWindow::on_pushButton_load_clicked()
             parseData(datas[i]);
         }
         checkWarningState();
-        adaptiveRangeChange();
+        setupScroolBar();
         printToConsole("已成功载入："+fileNames[0]);
     }
 }

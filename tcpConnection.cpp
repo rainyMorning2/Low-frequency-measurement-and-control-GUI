@@ -7,7 +7,7 @@ void MainWindow::tcpInit(){
 
     ui->lineEdit_IP->setText(settings->value("IP").toString());
     ui->lineEdit_Port->setText(settings->value("port").toString());
-    threadSocket = new ThreadTcp(settings->value("interval").toInt());
+    threadSocket = new ThreadTcp(settings->value("interval").toInt(),settings->value("packageCheck").toBool());
 
     // connect slots with ui
     connect(threadSocket,SIGNAL(sig_print(QString)),this,SLOT(printToConsole(QString)));

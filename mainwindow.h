@@ -111,7 +111,7 @@ private:
     void setupScroolBar();
     bool isRealTimeReceiving;
     bool isDataRemained;
-
+    void autoSqueeze();
     void analogInit();
     QCustomPlot* addNewChart(int);
 

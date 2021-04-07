@@ -10,7 +10,7 @@ class ThreadTcp : public QTcpSocket{
     Q_OBJECT
 public:
     ThreadTcp();
-    ThreadTcp(int);
+    ThreadTcp(int,bool);
     ~ThreadTcp();
 
 

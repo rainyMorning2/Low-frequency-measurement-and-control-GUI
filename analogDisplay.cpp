@@ -23,7 +23,10 @@ QVector<unsigned char> rs422_2_data;
 
 double timescale;
 double highTimescale;
+int delRatioA;
+int delRatioB;
 int maxDisplay;
+int maxSize;
 double *warningLimitsLow;
 double *warningLimitsHigh;
 int *warningCnt;
@@ -101,7 +104,11 @@ void MainWindow::analogInit(){
     QVariant defaultRes = settings->value("Regression/default");
     checkboxNames = settings->value("checkboxNames").toStringList();
     tabNames = settings->value("tabNames").toStringList();
-    timescale = settings->value("timescale").toDouble()/1000;
+    maxSize = settings->value("lastTime").toInt()*60*200;
+    delRatioA = settings->value("delRatioA").toInt();
+    delRatioB = settings->value("delRatioB").toInt();
+
+    timescale = 5.0/1000;
     highTimescale = timescale/34;
 
     checkGroup = new QButtonGroup();
@@ -235,9 +242,9 @@ void MainWindow::check(int id, bool checked)
 
 }
 
-void MainWindow::mouseWheel(QWheelEvent* event){
+void MainWindow::mouseWheel(QWheelEvent*){
     for(int i=0;i<inDisplay.size();i++){
-        if(inDisplay[i]->geometry().contains(QCursor::pos())){
+        if(inDisplay[i]->geometry().contains(inDisplay[i]->mapFromGlobal(QCursor::pos()))){
             inDisplay[i]->xAxis->setRangeLower(timeStartBias);
         }
     }
@@ -324,10 +331,11 @@ QCustomPlot* MainWindow::addNewChart(int id){
 
     mChart->setOpenGl(true);
     mChart->graph(0)->setSmooth(true);
-    connect(mChart,SIGNAL(mouseWheel(QWheelEvent*)),this,SLOT(mouseWheel(QWheelEvent*)));
 
+    connect(mChart,SIGNAL(mouseWheel(QWheelEvent*)),this,SLOT(mouseWheel(QWheelEvent*)));
     connect(horizontalScrollBar, SIGNAL(customValueChanged(int,int)), this, SLOT(horzScrollBarChanged(int,int)));
     connect(mChart->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+
     return mChart;
 
 }
@@ -352,6 +360,28 @@ void MainWindow::adaptiveRangeChange(){
     }
 }
 
+void MainWindow::autoSqueeze(){
+    static double currentStart = timeStartBias;
+    if(normalData[0]->size()>maxSize){
+        double temp = (normalTimeIndex-currentStart)/delRatioB*delRatioA+currentStart;
+        for(int i=0;i<200;i++){
+            normalData[i]->removeBefore(temp);
+            normalData[i]->squeeze(true,true);
+        }
+        highspeedData->removeBefore(temp);
+        highspeedData->squeeze(true,true);
+        currentStart = temp;
+        scroolBarBegin = currentStart*100;
+
+        if(isSaveEnabled){
+            file.close();
+            file.open(QIODevice::WriteOnly | QIODevice::Append);
+        }
+
+    }
+
+}
+
 void MainWindow::refreshAnalogData(quint32* data){
 
     static int cnt = 1;
@@ -361,6 +391,8 @@ void MainWindow::refreshAnalogData(quint32* data){
     parseData(data);
 
     adaptiveRangeChange();
+
+    autoSqueeze();
 
     //  warning
     if(!(isDebug && !warningEnable)){
@@ -585,8 +617,10 @@ void MainWindow::resetDataIndex(){
     memset(isOverflow,0,200*sizeof(bool));
 
     highspeedData->clear();
+    highspeedData->squeeze(true,true);
     for(int i=0;i<200;i++){
         normalData[i]->clear();
+        normalData[i]->squeeze(true,true);
     }
 
 

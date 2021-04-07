@@ -1,15 +1,19 @@
 #include "threadTcp.h"
+#include <QSettings>
 
 quint32* data;
 bool isStart = false;
+bool isCheck;
 
-ThreadTcp::ThreadTcp(int interval)
+ThreadTcp::ThreadTcp(int interval,bool packageCheck)
 {
     data_stream.setDevice(this);
     data_stream.setByteOrder(QDataStream::LittleEndian);
     timer = new QTimer(this);
     timer->setInterval(interval);
     data = new quint32[256];
+
+    isCheck = packageCheck;
 
     connect(this, SIGNAL(readyRead()),this,SLOT(socket_Read_Data()));
     connect(timer,SIGNAL(timeout()),this,SLOT(updateAnalogData()));
@@ -76,18 +80,18 @@ void ThreadTcp::updateAnalogData(){
 
     for(int i=0;i<256;i++){
         data_stream>>data[i];
-//        if(i==0){
-//            while((data[i]&0xFFFF0000) != 0x7E7E0000){
-//                data_stream>>data[i];
-//                qDebug()<<QString("%1").arg(data[i],8,16,QLatin1Char('0'));
-//            }
-//        }
+
+        if(isCheck && i==0){
+            while((data[i]&0xFFFF0000) != 0x7E7E0000){
+                data_stream>>data[i];
+            }
+        }
+
     }
 
-//    if((data[255]&0x0000FFFF) != 0x00001A1A){
-//        return;
-//    }
-
+    if(isCheck && (data[255]&0x0000FFFF) != 0x00001A1A){
+        return;
+    }
     qDebug()<<cnt<<" socket left"<<bytesAvailable();
     cnt++;
     emit sig_updateAnalogData(data);
