@@ -6,6 +6,7 @@
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QGridLayout>
+#include "customscrollbar.h"
 
 QStringList checkboxNames;
 QStringList tabNames;
@@ -38,16 +39,39 @@ bool rs422Enable;
 
 double *regressionK;
 double *regressionB;
+int scroolBarEnd;
+int scroolBarBegin;
 
+const int timeStartBias = 16*60*60;
 const int IN2OUTLUT[200] = {10,	9,	26,	8,	27,	28,	29,	30,	12,	11,	13,	20,	2,	19,	1,	3,	21,	4,	24,	23,	22,	5,	6,	7,	25,	37,	38,	39,	40,	36,	35,	18,	15,	34,	33,	17,	16,	32,	31,	14,	50,	49,	66,	48,	67,	68,	69,	70,	52,	51,	53,	60,	42,	59,	41,	43,	61,	44,	64,	63,	62,	45,	46,	47,	65,	77,	78,	79,	80,	76,	75,	58,	55,	74,	73,	57,	56,	72,	71,	54,	90,	89,	106,	88,	107,	108,	109,	110,	92,	91,	93,	100,	82,	99,	81,	83,	101,	84,	104,	103,	102,	85,	86,	87,	105,	117,	118,	119,	120,	116,	115,	98,	95,	114,	113,	97,	96,	112,	111,	94,	130,	129,	146,	128,	147,	148,	149,	150,	132,	131,	133,	140,	122,	139,	121,	123,	141,	124,	144,	143,	142,	125,	126,	127,	145,	157,	158,	159,	160,	156,	155,	138,	135,	154,	153,	137,	136,	152,	151,	134,	170,	169,	186,	168,	187,	188,	189,	190,	172,	171,	173,	180,	162,	179,	161,	163,	181,	164,	184,	183,	182,	165,	166,	167,	185,	197,	198,	199,	200,	196,	195,	178,	175,	194,	193,	177,	176,	192,	191,	174};
 const int OUT2INLUT[201] = {-1, 14,	12,	15,	17,	21,	22,	23,	3,	1,	0,	9,	8,	10,	39,	32,	36,	35,	31,	13,	11,	16,	20,	19,	18,	24,	2,	4,	5,	6,	7,	38,	37,	34,	33,	30,	29,	25,	26,	27,	28,	54,	52,	55,	57,	61,	62,	63,	43,	41,	40,	49,	48,	50,	79,	72,	76,	75,	71,	53,	51,	56,	60,	59,	58,	64,	42,	44,	45,	46,	47,	78,	77,	74,	73,	70,	69,	65,	66,	67,	68,	94,	92,	95,	97,	101,	102,	103,	83,	81,	80,	89,	88,	90,	119,	112,	116,	115,	111,	93,	91,	96,	100,	99,	98,	104,	82,	84,	85,	86,	87,	118,	117,	114,	113,	110,	109,	105,	106,	107,	108,	134,	132,	135,	137,	141,	142,	143,	123,	121,	120,	129,	128,	130,	159,	152,	156,	155,	151,	133,	131,	136,	140,	139,	138,	144,	122,	124,	125,	126,	127,	158,	157,	154,	153,	150,	149,	145,	146,	147,	148,	174,	172,	175,	177,	181,	182,	183,	163,	161,	160,	169,	168,	170,	199,	192,	196,	195,	191,	173,	171,	176,	180,	179,	178,	184,	162,	164,	165,	166,	167,	198,	197,	194,	193,	190,	189,	185,	186,	187,	188};
 QVector<QSharedPointer<QCPDataContainer<QCPGraphData>>> normalData;
 QSharedPointer<QCPDataContainer<QCPGraphData>> highspeedData;
 
+void MainWindow::realTimeRevChanged(bool state){
+    isDataRemained = state;
+    isRealTimeReceiving = (currentMode==NORMAL||currentMode==HIGHSPEED) || isDataRemained;
+    setupScroolBar();
+}
+
+void MainWindow::setupScroolBar(){
+    for(int i=0;i<inDisplay.size();i++){
+        customScrollBar* temp = (customScrollBar*)inDisplay[i]->layout()->itemAt(0)->widget();
+        temp->setVisible(!isRealTimeReceiving);
+        if(!isRealTimeReceiving){
+            QCPRange range = inDisplay[i]->xAxis->range();
+            scroolBarEnd = normalTimeIndex*100;
+            temp->setRange(scroolBarBegin,scroolBarEnd);
+            temp->setValue(qRound(range.center()*100.0)); // adjust position of scroll bar slider
+            temp->setPageStep(qRound(range.size()*100.0)); // adjust size of scroll bar slider
+        }
+    }
+}
+
 void MainWindow::analogInit(){
     maxDisplay = 4;
-    normalTimeIndex = 16*60*60;
-    highTimeIndex = 16*60*60;
+    normalTimeIndex = timeStartBias;
+    highTimeIndex = timeStartBias;
     isSaveEnabled = false;
     warningCnt = new int[5];
     isOverflow = new bool[200];
@@ -55,6 +79,8 @@ void MainWindow::analogInit(){
     warningLimitsHigh = new double[200];
     regressionB = new double[200];
     regressionK = new double[200];
+    isRealTimeReceiving = false;
+    isDataRemained = false;
 
     memset(warningCnt,0,5*sizeof(int));
     memset(isOverflow,0,200*sizeof(bool));
@@ -69,6 +95,8 @@ void MainWindow::analogInit(){
     warningEnable = settings->value("DebugMode/warningEnable").toBool();
 
     xRange = settings->value("xRange").toInt();
+    scroolBarBegin = timeStartBias*100;
+    scroolBarEnd = scroolBarBegin+xRange/10;
     QVariant defaultLimit = settings->value("WarningLimit/default");
     QVariant defaultRes = settings->value("Regression/default");
     checkboxNames = settings->value("checkboxNames").toStringList();
@@ -134,6 +162,7 @@ void MainWindow::analogInit(){
 
     connect(checkGroup,SIGNAL(idToggled(int,bool)),this,SLOT(check(int,bool)));
     connect(&chartUpdate,SIGNAL(timeout()),this,SLOT(refreshChart()));
+
 }
 
 void MainWindow::resortCharts(bool isDel){
@@ -206,6 +235,37 @@ void MainWindow::check(int id, bool checked)
 
 }
 
+void MainWindow::mouseWheel(QWheelEvent* event){
+    for(int i=0;i<inDisplay.size();i++){
+        if(inDisplay[i]->geometry().contains(QCursor::pos())){
+            inDisplay[i]->xAxis->setRangeLower(timeStartBias);
+        }
+    }
+}
+
+void MainWindow::horzScrollBarChanged(int value,int id){
+    for(int i=0;i<inDisplay.size();i++){
+        if(inDisplay[i]->objectName().toInt()==id && qAbs(inDisplay[i]->xAxis->range().center()-value/100.0) > 0.01){ // if user is dragging plot, we don't want to replot twice
+          inDisplay[i]->xAxis->setRange(value/100.0, inDisplay[i]->xAxis->range().size(), Qt::AlignCenter);
+          inDisplay[i]->replot();
+          break;
+        }
+    }
+
+}
+
+void MainWindow::xAxisChanged(QCPRange range){
+    for(int i=0;i<inDisplay.size();i++){
+        if(range==inDisplay[i]->xAxis->range()){
+            customScrollBar* temp = (customScrollBar*)inDisplay[i]->layout()->itemAt(0)->widget();
+            temp->setValue(qRound(range.center()*100.0)); // adjust position of scroll bar slider
+            temp->setPageStep(qRound(range.size()*100.0)); // adjust size of scroll bar slider
+            break;
+        }
+    }
+
+}
+
 QCustomPlot* MainWindow::addNewChart(int id){
 
     QString title = checkboxNames[id];
@@ -220,10 +280,25 @@ QCustomPlot* MainWindow::addNewChart(int id){
     }
 
     QCustomPlot* mChart = new QCustomPlot();
+
+    customScrollBar *horizontalScrollBar = new customScrollBar(mChart,id);
+    horizontalScrollBar->setOrientation(Qt::Horizontal);
+    horizontalScrollBar->setVisible(!isRealTimeReceiving);
+    if(!isRealTimeReceiving){
+        QCPRange range = mChart->xAxis->range();
+        scroolBarEnd = normalTimeIndex*100;
+        horizontalScrollBar->setRange(scroolBarBegin,scroolBarEnd);
+        horizontalScrollBar->setValue(qRound(range.center()*100.0)); // adjust position of scroll bar slider
+        horizontalScrollBar->setPageStep(qRound(range.size()*100.0)); // adjust size of scroll bar slider
+    }
+
+    mChart->setLayout(new QVBoxLayout(mChart));
+    mChart->layout()->addWidget(horizontalScrollBar);
+    mChart->layout()->setAlignment(Qt::AlignBottom);
+
     QSharedPointer<QCPAxisTickerDateTime> dateTicker(new QCPAxisTickerDateTime);
     dateTicker->setDateTimeFormat("hh:mm:ss.zzz");
     mChart->xAxis->setTicker(dateTicker);
-
     mChart->addGraph();
 
     if((currentMode == HIGHSPEED || (lastMode== HIGHSPEED && currentMode==IDLE )) && id+1 == highSpeedChannel){
@@ -239,17 +314,23 @@ QCustomPlot* MainWindow::addNewChart(int id){
     mChart->axisRect()->setRangeZoom(Qt::Horizontal);
 
     mChart->plotLayout()->insertRow(0);
-    mChart->plotLayout()->addElement(0, 0, new QCPTextElement(mChart, title, QFont("sans", 12, QFont::Bold)));
+    mChart->plotLayout()->addElement(0, 0, new QCPTextElement(mChart, title, QFont("sans", 10, QFont::Bold)));
+    mChart->plotLayout()->insertRow(2);
+    mChart->plotLayout()->addElement(2, 0, new QCPTextElement(mChart, "", QFont("sans", 14, QFont::Bold)));
     mChart->xAxis->setLabel("sample-time");
     mChart->yAxis->setLabel("Voltage-V");
-    mChart->xAxis->setRange(16*60*60,16*60*60+(xRange/1000.0));
+    mChart->xAxis->setRange(timeStartBias,timeStartBias+(xRange/1000.0));
     mChart->yAxis->setRange(leftYRange, rightYRange);
-    mChart->setOpenGl(true);
 
+    mChart->setOpenGl(true);
+    mChart->graph(0)->setSmooth(true);
+    connect(mChart,SIGNAL(mouseWheel(QWheelEvent*)),this,SLOT(mouseWheel(QWheelEvent*)));
+
+    connect(horizontalScrollBar, SIGNAL(customValueChanged(int,int)), this, SLOT(horzScrollBarChanged(int,int)));
+    connect(mChart->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
     return mChart;
 
 }
-
 
 void MainWindow::changeToHighspeedData(){
     for(int i=0;i<inDisplay.size();i++) {
@@ -261,6 +342,16 @@ void MainWindow::changeToHighspeedData(){
     }
 }
 
+void MainWindow::adaptiveRangeChange(){
+    for(int i=0;i<inDisplay.size();i++) {
+        QCPRange range = inDisplay[i]->xAxis->range();
+        if(normalTimeIndex>range.upper){
+            inDisplay[i]->xAxis->setRange(normalTimeIndex, normalTimeIndex+range.size());
+            inDisplay[i]->replot();
+        }
+    }
+}
+
 void MainWindow::refreshAnalogData(quint32* data){
 
     static int cnt = 1;
@@ -268,11 +359,13 @@ void MainWindow::refreshAnalogData(quint32* data){
 
     // parse data into rs422 and analogData display
     parseData(data);
+
+    adaptiveRangeChange();
+
     //  warning
     if(!(isDebug && !warningEnable)){
         checkWarningState();
     }
-
 
     if(isDebug && cnt==debugCnt){
 
@@ -481,8 +574,12 @@ void MainWindow::refreshChart(){
 }
 
 void MainWindow::resetDataIndex(){
-    normalTimeIndex = 16*60*60;
-    highTimeIndex = 16*60*60;
+    normalTimeIndex = timeStartBias;
+    highTimeIndex = timeStartBias;
+    scroolBarBegin = timeStartBias*100;
+    scroolBarEnd = scroolBarBegin + xRange/10;
+
+    setupScroolBar();
 
     memset(warningCnt,0,5*sizeof(int));
     memset(isOverflow,0,200*sizeof(bool));
@@ -492,5 +589,5 @@ void MainWindow::resetDataIndex(){
         normalData[i]->clear();
     }
 
-    refreshChart();
+
 }

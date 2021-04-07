@@ -15,6 +15,7 @@ void MainWindow::tcpInit(){
     connect(threadSocket,SIGNAL(sig_connectSucceed()),this,SLOT(connectSucceed()));
     connect(threadSocket, SIGNAL(disconnected()), this, SLOT(disconnectSucceed()));
     connect(threadSocket,SIGNAL(sig_updateAnalogData(quint32*)),this,SLOT(refreshAnalogData(quint32*)),Qt::BlockingQueuedConnection);
+    connect(threadSocket, SIGNAL(sig_realTimeRevChanged(bool)), this, SLOT(realTimeRevChanged(bool)));
 
     connect(this,SIGNAL(sig_connect(QString,int)),threadSocket,SLOT(connectTo(QString,int)));
     connect(this,SIGNAL(sig_disconnect()),threadSocket,SLOT(disconnectFrom()));

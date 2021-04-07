@@ -1,7 +1,7 @@
 #include "threadTcp.h"
 
 quint32* data;
-bool isStarted = false;
+bool isStart = false;
 
 ThreadTcp::ThreadTcp(int interval)
 {
@@ -56,26 +56,21 @@ void ThreadTcp::send(QByteArray message){
 
 void ThreadTcp::socket_Read_Data()
 {
-    //读取缓冲区数据
-    if(bytesAvailable()>=1024){
-//        qDebug()<<"socket rev"<<bytesAvailable();
-        if(!isStarted){
-            timer->start();
-            isStarted = true;
-        }
+    if(bytesAvailable()>=1024 && !isStart){
+        timer->start();
+        isStart = true;
+        emit sig_realTimeRevChanged(isStart);
     }else{
         return;
     }
-
-//    qDebug()<<"socket left"<<bytesAvailable();
-
 }
 
 void ThreadTcp::updateAnalogData(){
     static int cnt = 0;
-    if(bytesAvailable()<2048){
+    if(bytesAvailable()<1024){
         timer->stop();
-        isStarted = false;
+        isStart = false;
+        emit sig_realTimeRevChanged(isStart);
         return;
     }
 

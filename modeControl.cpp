@@ -200,6 +200,7 @@ void MainWindow::on_pushButton_load_clicked()
             parseData(datas[i]);
         }
         checkWarningState();
+        adaptiveRangeChange();
         printToConsole("已成功载入："+fileNames[0]);
     }
 }

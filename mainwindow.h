@@ -33,6 +33,10 @@ private slots:
     */
     void refreshAnalogData(quint32*);
     void refreshChart();
+    void mouseWheel(QWheelEvent*);
+    void horzScrollBarChanged(int,int);
+    void xAxisChanged(QCPRange range);
+    void realTimeRevChanged(bool);
 
     /*
      * tcp/ip connection
@@ -43,6 +47,7 @@ private slots:
     void on_pushButton_Connect_clicked();
 
     void readPendingDatagrams();
+
 
 
     /*
@@ -75,7 +80,7 @@ private:
     void sendMessage(QByteArray);
     void parse_data(QByteArray);
 
-    void udpInit();
+    void udpInit(); // anbandoned
 
     /*
      * mode control
@@ -102,6 +107,10 @@ private:
     void parseData(quint32*);
     double data2Voltage(quint32, int);
     void changeToHighspeedData();
+    void adaptiveRangeChange();
+    void setupScroolBar();
+    bool isRealTimeReceiving;
+    bool isDataRemained;
 
     void analogInit();
     QCustomPlot* addNewChart(int);
@@ -114,6 +123,7 @@ private:
     bool isConnected;
     bool isReset;
     bool isSelfchecked;
+
     enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,RESET,IDLE};
     ModeList currentMode;
     ModeList lastMode;

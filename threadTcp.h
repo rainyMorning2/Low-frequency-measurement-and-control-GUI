@@ -19,6 +19,7 @@ signals:
     void sig_connectSucceed();
     void sig_connectFailed();
     void sig_updateAnalogData(quint32*);
+    void sig_realTimeRevChanged(bool);
 
 private:
     QDataStream data_stream;

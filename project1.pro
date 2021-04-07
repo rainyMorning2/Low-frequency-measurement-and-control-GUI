@@ -13,6 +13,7 @@ DEFINES += QCUSTOMPLOT_USE_OPENGL
 
 SOURCES += \
     analogDisplay.cpp \
+    customscrollbar.cpp \
     customtab.cpp \
     customtabwidget.cpp \
     customtext.cpp \
@@ -26,6 +27,7 @@ SOURCES += \
     udpServer.cpp
 
 HEADERS += \
+    customscrollbar.h \
     customtab.h \
     customtabwidget.h \
     customtext.h \
