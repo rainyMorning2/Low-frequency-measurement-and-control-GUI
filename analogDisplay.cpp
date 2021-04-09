@@ -56,7 +56,7 @@ QSharedPointer<QCPDataContainer<QCPGraphData>> highspeedData;
 
 void MainWindow::realTimeRevChanged(bool state){
     isDataRemained = state;
-    isRealTimeReceiving = (currentMode==NORMAL||currentMode==HIGHSPEED) || isDataRemained;
+    isRealTimeReceiving = (currentMode==SELFCHECK || currentMode==NORMAL||currentMode==HIGHSPEED) || isDataRemained;
     setupScroolBar();
 }
 
@@ -428,6 +428,9 @@ void MainWindow::selfCheckConfirm(){
                 selfcheckInfo += "\n";
                 isRs422Checked = false;
             }
+        }
+        if(isNormalChecked && isRs422Checked){
+            selfcheckInfo += "自检正常！";
         }
         isSelfchecked = true;
         printToConsole(selfcheckInfo);

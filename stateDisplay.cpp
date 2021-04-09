@@ -14,7 +14,7 @@ void MainWindow::stateInit(){
 }
 
 void MainWindow::updateState(){
-    isRealTimeReceiving = (currentMode==NORMAL||currentMode==HIGHSPEED) || isDataRemained;
+    isRealTimeReceiving = (currentMode==SELFCHECK || currentMode==NORMAL||currentMode==HIGHSPEED) || isDataRemained;
     setupScroolBar();
     QString mode;
     switch (currentMode) {
