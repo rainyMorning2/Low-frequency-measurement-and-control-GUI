@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
 //    setWindowState(Qt::WindowMaximized);
     ui->setupUi(this);
-
+    setWindowTitle("低频测控组合控制程序");
 
     QString file= QCoreApplication::applicationDirPath() + "/Config.ini";
     settings = new QSettings(file, QSettings::IniFormat);

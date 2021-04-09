@@ -62,7 +62,6 @@ void MainWindow::on_pushButton_start_clicked()
             }
             lastMode = currentMode;
             currentMode = SELFCHECK;
-            isSelfchecked = true;
             break;
         case NORMAL:
             if(flag){

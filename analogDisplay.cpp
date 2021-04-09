@@ -30,6 +30,7 @@ int maxSize;
 double *warningLimitsLow;
 double *warningLimitsHigh;
 int *warningCnt;
+int selfcheckCnt;
 
 bool isDebug;
 bool warningEnable;
@@ -44,6 +45,8 @@ double *regressionK;
 double *regressionB;
 int scroolBarEnd;
 int scroolBarBegin;
+
+int *selfcheckTarget;
 
 const int timeStartBias = 16*60*60;
 const int IN2OUTLUT[200] = {10,	9,	26,	8,	27,	28,	29,	30,	12,	11,	13,	20,	2,	19,	1,	3,	21,	4,	24,	23,	22,	5,	6,	7,	25,	37,	38,	39,	40,	36,	35,	18,	15,	34,	33,	17,	16,	32,	31,	14,	50,	49,	66,	48,	67,	68,	69,	70,	52,	51,	53,	60,	42,	59,	41,	43,	61,	44,	64,	63,	62,	45,	46,	47,	65,	77,	78,	79,	80,	76,	75,	58,	55,	74,	73,	57,	56,	72,	71,	54,	90,	89,	106,	88,	107,	108,	109,	110,	92,	91,	93,	100,	82,	99,	81,	83,	101,	84,	104,	103,	102,	85,	86,	87,	105,	117,	118,	119,	120,	116,	115,	98,	95,	114,	113,	97,	96,	112,	111,	94,	130,	129,	146,	128,	147,	148,	149,	150,	132,	131,	133,	140,	122,	139,	121,	123,	141,	124,	144,	143,	142,	125,	126,	127,	145,	157,	158,	159,	160,	156,	155,	138,	135,	154,	153,	137,	136,	152,	151,	134,	170,	169,	186,	168,	187,	188,	189,	190,	172,	171,	173,	180,	162,	179,	161,	163,	181,	164,	184,	183,	182,	165,	166,	167,	185,	197,	198,	199,	200,	196,	195,	178,	175,	194,	193,	177,	176,	192,	191,	174};
@@ -84,6 +87,10 @@ void MainWindow::analogInit(){
     regressionK = new double[200];
     isRealTimeReceiving = false;
     isDataRemained = false;
+    selfcheckTarget = new int[8];
+    for(int i=0;i<8;i++){
+        selfcheckTarget[i] = settings->value(QString("Selfcheck/target%1").arg(i+1)).toByteArray().toInt(nullptr,16);
+    }
 
     memset(warningCnt,0,5*sizeof(int));
     memset(isOverflow,0,200*sizeof(bool));
@@ -107,6 +114,7 @@ void MainWindow::analogInit(){
     maxSize = settings->value("lastTime").toInt()*60*200;
     delRatioA = settings->value("delRatioA").toInt();
     delRatioB = settings->value("delRatioB").toInt();
+    selfcheckCnt = settings->value("selfcheckCnt").toInt();
 
     timescale = 5.0/1000;
     highTimescale = timescale/34;
@@ -382,6 +390,48 @@ void MainWindow::autoSqueeze(){
 
 }
 
+void MainWindow::selfCheckConfirm(){
+    if(normalData[0]->size()==selfcheckCnt){
+        QString selfcheckInfo = "\n";
+
+        //check normal data
+        for(int i=0;i<200;i++){
+            for(auto it = normalData[i]->constBegin();it<normalData[i]->constEnd();it++){
+                if(qAbs(it->mainValue()-5)>=0.04){
+                    selfcheckInfo += QString("第%1帧 第%2路通道 自检结果异常：采样值为%3 ，理论值为5V").arg(QString::number(it-normalData[i]->constBegin()+1),
+                                                                                      QString::number(IN2OUTLUT[i]),QString::number(it->mainValue()));
+                    selfcheckInfo += "\n";
+                    isNormalChecked = false;
+                }
+            }
+        }
+        //check rs422 data
+
+        for(int i=0;i<selfcheckCnt;i++){
+            if(rs422_1_data[0+i*256]!=selfcheckTarget[0] || rs422_1_data[1+i*256]!=selfcheckTarget[1] || rs422_1_data[2+i*256]!=selfcheckTarget[2]
+                    || rs422_1_data[3+i*256]!=selfcheckTarget[3] || rs422_1_data[252+i*256]!=selfcheckTarget[4] ||
+                    rs422_1_data[253+i*256]!=selfcheckTarget[5] || rs422_1_data[254+i*256]!=selfcheckTarget[6] ||
+                    rs422_1_data[255+i*256]!=selfcheckTarget[7]){
+                selfcheckInfo += QString("第%1帧 第1路rs422 自检结果异常").arg(QString::number(i+1));
+                selfcheckInfo += "\n";
+                isRs422Checked = false;
+            }
+            if(rs422_2_data[0+i*256]!=selfcheckTarget[0] || rs422_2_data[1+i*256]!=selfcheckTarget[1] || rs422_2_data[2+i*256]!=selfcheckTarget[2]
+                    || rs422_2_data[3+i*256]!=selfcheckTarget[3] || rs422_2_data[252+i*256]!=selfcheckTarget[4] ||
+                    rs422_2_data[253+i*256]!=selfcheckTarget[5] || rs422_2_data[254+i*256]!=selfcheckTarget[6] ||
+                    rs422_2_data[255+i*256]!=selfcheckTarget[7]){
+                selfcheckInfo += QString("第%1帧 第2路rs422 自检结果异常").arg(QString::number(i+1));
+                selfcheckInfo += "\n";
+                isRs422Checked = false;
+            }
+        }
+        isSelfchecked = true;
+        printToConsole(selfcheckInfo);
+        // stop selfcheck mode
+        on_pushButton_stop_clicked();
+    }
+}
+
 void MainWindow::refreshAnalogData(quint32* data){
 
     static int cnt = 1;
@@ -393,6 +443,8 @@ void MainWindow::refreshAnalogData(quint32* data){
     adaptiveRangeChange();
 
     autoSqueeze();
+
+    selfCheckConfirm();
 
     //  warning
     if(!(isDebug && !warningEnable)){

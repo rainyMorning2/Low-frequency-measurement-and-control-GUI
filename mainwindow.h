@@ -112,6 +112,7 @@ private:
     bool isRealTimeReceiving;
     bool isDataRemained;
     void autoSqueeze();
+    void selfCheckConfirm();
     void analogInit();
     QCustomPlot* addNewChart(int);
 
@@ -123,6 +124,8 @@ private:
     bool isConnected;
     bool isReset;
     bool isSelfchecked;
+    bool isNormalChecked;
+    bool isRs422Checked;
 
     enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,RESET,IDLE};
     ModeList currentMode;
