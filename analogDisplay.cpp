@@ -162,6 +162,10 @@ void MainWindow::analogInit(){
     QSplitter * HSplitter = new QSplitter(Qt::Horizontal);//新建水平分割器
 
     HSplitter->setHandleWidth(1);//分割线的宽度
+    VSplitter->setHandleWidth(1);//分割线的宽度
+//    HSplitter->setStyleSheet("QSplitter::handle { background-color: red }");
+//    VSplitter->setStyleSheet("QSplitter::handle { background-color: red }");
+
     HSplitter->setChildrenCollapsible(false);//不允许把分割出的子窗口拖小到0，最小值被限定为sizeHint或maxSize/minSize
     VSplitter->setChildrenCollapsible(false);//不允许把分割出的子窗口拖小到0，最小值被限定为sizeHint或maxSize/minSize
 
@@ -444,7 +448,9 @@ void MainWindow::refreshAnalogData(quint32* data){
 
     autoSqueeze();
 
-    selfCheckConfirm();
+    if(currentMode==SELFCHECK){
+        selfCheckConfirm();
+    }
 
     //  warning
     if(!(isDebug && !warningEnable)){
