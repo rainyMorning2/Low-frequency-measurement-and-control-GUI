@@ -83,12 +83,12 @@ void MainWindow::analogInit(){
     isOverflow = new bool[200];
     warningLimitsLow = new double[200];
     warningLimitsHigh = new double[200];
-    regressionB = new double[200];
-    regressionK = new double[200];
+    regressionB = new double[201];
+    regressionK = new double[201];
     isRealTimeReceiving = false;
     isDataRemained = false;
     selfcheckTarget = new int[8];
-    for(int i=0;i<8;i++){
+    for(int i=0;i<4;i++){
         selfcheckTarget[i] = settings->value(QString("Selfcheck/target%1").arg(i+1)).toByteArray().toInt(nullptr,16);
     }
 
@@ -127,6 +127,10 @@ void MainWindow::analogInit(){
     vlayout->setRowStretch(0,1);
 
     highspeedData = QSharedPointer<QCPDataContainer<QCPGraphData>>(new QCPDataContainer<QCPGraphData>);
+
+    regressionK[200] = defaultRes.toList()[0].toDouble();
+    regressionB[200] = defaultRes.toList()[1].toDouble();
+
     for(int i=0;i<5;i++){
         tab_layouts.append(new QGridLayout());
         for(int j=0;j<40;j++){
@@ -399,11 +403,13 @@ void MainWindow::selfCheckConfirm(){
         QString selfcheckInfo = "\n";
 
         //check normal data
-        for(int i=0;i<200;i++){
+        for(int i=0;i<34;i++){
+            if(i%7==6){
+                continue;
+            }
             for(auto it = normalData[i]->constBegin();it<normalData[i]->constEnd();it++){
-                if(qAbs(it->mainValue()-5)>=0.04){
-                    selfcheckInfo += QString("第%1帧 第%2路通道 自检结果异常：采样值为%3 ，理论值为5V").arg(QString::number(it-normalData[i]->constBegin()+1),
-                                                                                      QString::number(IN2OUTLUT[i]),QString::number(it->mainValue()));
+                if(qAbs(it->mainValue()-5.1)>=0.2){
+                    selfcheckInfo += QString("第%1帧 第%2路通道 自检结果异常").arg(QString::number(it-normalData[i]->constBegin()+1),QString::number(IN2OUTLUT[i]));
                     selfcheckInfo += "\n";
                     isNormalChecked = false;
                 }
@@ -411,19 +417,15 @@ void MainWindow::selfCheckConfirm(){
         }
         //check rs422 data
 
-        for(int i=0;i<selfcheckCnt;i++){
-            if(rs422_1_data[0+i*256]!=selfcheckTarget[0] || rs422_1_data[1+i*256]!=selfcheckTarget[1] || rs422_1_data[2+i*256]!=selfcheckTarget[2]
-                    || rs422_1_data[3+i*256]!=selfcheckTarget[3] || rs422_1_data[252+i*256]!=selfcheckTarget[4] ||
-                    rs422_1_data[253+i*256]!=selfcheckTarget[5] || rs422_1_data[254+i*256]!=selfcheckTarget[6] ||
-                    rs422_1_data[255+i*256]!=selfcheckTarget[7]){
+        for(int i=2;i<selfcheckCnt;i++){
+            if(rs422_1_data[0+i*256]!=selfcheckTarget[0] || rs422_1_data[1+i*256]!=selfcheckTarget[1]
+                    || rs422_1_data[252+i*256]!=selfcheckTarget[2] || rs422_1_data[253+i*256]!=selfcheckTarget[3]){
                 selfcheckInfo += QString("第%1帧 第1路rs422 自检结果异常").arg(QString::number(i+1));
                 selfcheckInfo += "\n";
                 isRs422Checked = false;
             }
-            if(rs422_2_data[0+i*256]!=selfcheckTarget[0] || rs422_2_data[1+i*256]!=selfcheckTarget[1] || rs422_2_data[2+i*256]!=selfcheckTarget[2]
-                    || rs422_2_data[3+i*256]!=selfcheckTarget[3] || rs422_2_data[252+i*256]!=selfcheckTarget[4] ||
-                    rs422_2_data[253+i*256]!=selfcheckTarget[5] || rs422_2_data[254+i*256]!=selfcheckTarget[6] ||
-                    rs422_2_data[255+i*256]!=selfcheckTarget[7]){
+            if(rs422_2_data[0+i*256]!=selfcheckTarget[0] || rs422_2_data[1+i*256]!=selfcheckTarget[1]
+                    || rs422_2_data[252+i*256]!=selfcheckTarget[2] || rs422_2_data[253+i*256]!=selfcheckTarget[3]){
                 selfcheckInfo += QString("第%1帧 第2路rs422 自检结果异常").arg(QString::number(i+1));
                 selfcheckInfo += "\n";
                 isRs422Checked = false;
@@ -546,7 +548,11 @@ void MainWindow::refreshAnalogData(quint32* data){
 }
 
 double MainWindow::data2Voltage(quint32 value, int index){
-    return regressionK[index] * value + regressionB[index];
+    if(currentMode==SELFCHECK){
+        return regressionK[200] * value + regressionB[200];
+    }else{
+        return regressionK[index] * value + regressionB[index];
+    }
 }
 
 void MainWindow::parseData(quint32* data){
