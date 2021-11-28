@@ -6,6 +6,7 @@
 #include <threadTcp.h>
 #include <customtabwidget.h>
 #include "qcustomplot.h"
+#include "settingwindow.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -67,6 +68,20 @@ private slots:
     */
     void updateState();
 
+    void pushButton_send_clicked();
+
+    void on_pushButton_set_clicked();
+
+    void on_radioButton_single_clicked();
+
+    void on_radioButton_multi_clicked();
+
+    void on_radioButton_selfcheck_mode_clicked();
+
+    void on_radioButton_reset_mode_clicked();
+
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QSettings* settings;
@@ -127,7 +142,7 @@ private:
     bool isNormalChecked;
     bool isRs422Checked;
 
-    enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,RESET,IDLE};
+    enum ModeList {SELFCHECK,NORMAL,HIGHSPEED,MULTI,SINGLE,RESET,IDLE};
     ModeList currentMode;
     ModeList lastMode;
 

@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>settingWindow</class>
+ <widget class="QWidget" name="settingWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>985</width>
+    <height>628</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_da">
+     <property name="title">
+      <string>DA控制</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_da">
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEdit_default"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_default">
+        <property name="text">
+         <string>填充值</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="pushButton_fill">
+        <property name="text">
+         <string>填充</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QPushButton" name="pushButton_clear">
+        <property name="text">
+         <string>清空</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="pushButton">
+     <property name="text">
+      <string>信道设置</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="pushButton_send">
+     <property name="text">
+      <string>发送</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QPushButton" name="pushButton_apply">
+     <property name="text">
+      <string>应用</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
+    <widget class="QGroupBox" name="groupBox_rs422">
+     <property name="title">
+      <string>RS422控制</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_rs422">
+      <item row="4" column="0">
+       <widget class="QCheckBox" name="checkBox_C">
+        <property name="text">
+         <string>RS422_C</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_3</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QRadioButton" name="radioButton_up">
+        <property name="text">
+         <string>上升沿触发</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_1</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <widget class="QCheckBox" name="checkBox_send">
+        <property name="text">
+         <string>发送使能</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_2</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="checkBox_B">
+        <property name="text">
+         <string>RS422_B</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_3</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QCheckBox" name="checkBox_D">
+        <property name="text">
+         <string>RS422_D</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_3</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QRadioButton" name="radioButton_down">
+        <property name="text">
+         <string>下降沿触发</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_1</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="11" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>发送数据</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="1">
+       <widget class="QComboBox" name="comboBox"/>
+      </item>
+      <item row="10" column="0">
+       <widget class="QLabel" name="label_interval">
+        <property name="text">
+         <string>发送间隔(ms)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="11" column="2">
+       <widget class="QPushButton" name="pushButton_select1">
+        <property name="text">
+         <string>选择文件</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="1">
+       <widget class="QCheckBox" name="checkBox_data">
+        <property name="text">
+         <string>数据设置</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_2</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="checkBox_A">
+        <property name="text">
+         <string>RS422_A</string>
+        </property>
+        <attribute name="buttonGroup">
+         <string notr="true">buttonGroup_3</string>
+        </attribute>
+       </widget>
+      </item>
+      <item row="10" column="1">
+       <widget class="QLineEdit" name="lineEdit_interval"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="1">
+    <widget class="QCheckBox" name="checkBox_key">
+     <property name="text">
+      <string>开关控制</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QCheckBox" name="checkBox_da">
+     <property name="text">
+      <string>DA控制</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2">
+    <widget class="QCheckBox" name="checkBox_rs422">
+     <property name="text">
+      <string>RS422控制</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QGroupBox" name="groupBox_key">
+     <property name="title">
+      <string>开关控制</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_key">
+      <item row="0" column="1">
+       <widget class="QPushButton" name="pushButton_selectReverse">
+        <property name="text">
+         <string>反选</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushButton_selectAll">
+        <property name="text">
+         <string>全选</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <widget class="QLineEdit" name="lineEdit_3"/>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLineEdit" name="lineEdit_4"/>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLineEdit" name="lineEdit_2"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLineEdit" name="lineEdit"/>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup_1"/>
+ </buttongroups>
+</ui>

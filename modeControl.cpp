@@ -8,15 +8,19 @@ QButtonGroup* buttonGroup;
 void MainWindow::modeCtrlInit(){
 
     buttonGroup = new QButtonGroup();
-    buttonGroup->addButton(ui->radioButton_high_speed_mode,HIGHSPEED);
-    buttonGroup->addButton(ui->radioButton_normal_mode,NORMAL);
+//    buttonGroup->addButton(ui->radioButton_high_speed_mode,HIGHSPEED);
+//    buttonGroup->addButton(ui->radioButton_normal_mode,NORMAL);
     buttonGroup->addButton(ui->radioButton_selfcheck_mode,SELFCHECK);
     buttonGroup->addButton(ui->radioButton_reset_mode,RESET);
+    buttonGroup->addButton(ui->radioButton_multi,MULTI);
+    buttonGroup->addButton(ui->radioButton_single,SINGLE);
 
-    ui->lineEdit_high_speed_channel->setEnabled(false);
     ui->pushButton_start->setEnabled(false);
     ui->pushButton_stop->setEnabled(false);
     ui->comboBox->setEditable(true);
+    ui->lineEdit_high_speed_channel->setEnabled(false);
+    ui->radioButton_high_speed_mode->setEnabled(false);
+    ui->radioButton_normal_mode->setEnabled(false);
 }
 
 void MainWindow::on_radioButton_high_speed_mode_toggled(bool checked)
@@ -52,7 +56,7 @@ void MainWindow::on_pushButton_start_clicked()
                 sendMessage(QByteArray::fromHex("E9E97A"));
                 flag = !flag;
             }
-            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             if(flag){
                 sendMessage(QByteArray::fromHex("E96B7A"));
                 flag = !flag;
@@ -63,38 +67,43 @@ void MainWindow::on_pushButton_start_clicked()
             lastMode = currentMode;
             currentMode = SELFCHECK;
             break;
-        case NORMAL:
-            if(flag){
-                sendMessage(QByteArray::fromHex("E9737A"));
-                flag = !flag;
-            }else{
-                sendMessage(QByteArray::fromHex("E9F37A"));
-                flag = !flag;
-            }
-            lastMode = currentMode;
-            currentMode = NORMAL;
+        case SINGLE:
+            // TODO
             break;
-        case HIGHSPEED:
-        {
-            highSpeedChannel = ui->lineEdit_high_speed_channel->text().toInt();
-            if(highSpeedChannel>=1 && highSpeedChannel<=200){
-                QByteArray mess = QByteArray::fromHex(settings->value(QString("highspeedCtrl/index%1").arg(highSpeedChannel)).toString().toLatin1());
+        case MULTI:
+            if(ui->radioButton_normal_mode->isChecked()){
                 if(flag){
-                    sendMessage(mess);
+                    sendMessage(QByteArray::fromHex("E9737A"));
                     flag = !flag;
                 }else{
-                    mess[1]=mess[1]|0x80;
-                    sendMessage(mess);
+                    sendMessage(QByteArray::fromHex("E9F37A"));
                     flag = !flag;
                 }
                 lastMode = currentMode;
-                currentMode = HIGHSPEED;
-                changeToHighspeedData();
-            }else{
-                printToConsole("请输入合法的通道号(1~200)");
+                currentMode = NORMAL;
             }
+
+            if(ui->radioButton_high_speed_mode->isChecked()){
+                highSpeedChannel = ui->lineEdit_high_speed_channel->text().toInt();
+                if(highSpeedChannel>=1 && highSpeedChannel<=200){
+                    QByteArray mess = QByteArray::fromHex(settings->value(QString("highspeedCtrl/index%1").arg(highSpeedChannel)).toString().toLatin1());
+                    if(flag){
+                        sendMessage(mess);
+                        flag = !flag;
+                    }else{
+                        mess[1]=mess[1]|0x80;
+                        sendMessage(mess);
+                        flag = !flag;
+                    }
+                    lastMode = currentMode;
+                    currentMode = HIGHSPEED;
+                    changeToHighspeedData();
+                }else{
+                    printToConsole("请输入合法的通道号(1~200)");
+                }
+            }
+
             break;
-        }
         default:
             printToConsole("请选择一个模式");
     }
@@ -223,4 +232,52 @@ void MainWindow::on_toolButton_clicked()
          ui->comboBox->setCurrentIndex(ui->comboBox->findText(fileNames[0]));
     }
 
+}
+
+void MainWindow::pushButton_send_clicked()
+{
+    QFile tempFile(QCoreApplication::applicationDirPath() + "/DAdata.dat");
+    tempFile.open(QIODevice::ReadOnly);
+    QByteArray mess = tempFile.readAll();
+    sendMessage(mess);
+    tempFile.close();
+}
+
+void MainWindow::on_pushButton_set_clicked()
+{
+    settingWindow *v = new settingWindow();
+    connect(v,SIGNAL(send_sig()),this,SLOT(pushButton_send_clicked()));
+    v->show();
+}
+
+void MainWindow::on_radioButton_single_clicked()
+{
+    ui->lineEdit_high_speed_channel->setEnabled(false);
+    ui->radioButton_high_speed_mode->setEnabled(false);
+    ui->radioButton_normal_mode->setEnabled(false);
+}
+
+void MainWindow::on_radioButton_multi_clicked()
+{
+    ui->lineEdit_high_speed_channel->setEnabled(true);
+    ui->radioButton_high_speed_mode->setEnabled(true);
+    ui->radioButton_normal_mode->setEnabled(true);
+    if(!ui->radioButton_high_speed_mode->isChecked() && !ui->radioButton_normal_mode->isChecked()){
+        ui->radioButton_normal_mode->setChecked(true);
+    }
+
+}
+
+void MainWindow::on_radioButton_selfcheck_mode_clicked()
+{
+    ui->lineEdit_high_speed_channel->setEnabled(false);
+    ui->radioButton_high_speed_mode->setEnabled(false);
+    ui->radioButton_normal_mode->setEnabled(false);
+}
+
+void MainWindow::on_radioButton_reset_mode_clicked()
+{
+    ui->lineEdit_high_speed_channel->setEnabled(false);
+    ui->radioButton_high_speed_mode->setEnabled(false);
+    ui->radioButton_normal_mode->setEnabled(false);
 }

@@ -31,6 +31,8 @@ double *warningLimitsLow;
 double *warningLimitsHigh;
 int *warningCnt;
 int selfcheckCnt;
+bool isSmooth;
+
 
 bool isDebug;
 bool warningEnable;
@@ -104,6 +106,8 @@ void MainWindow::analogInit(){
     rs422Enable = settings->value("DebugMode/rs422Enable").toBool();
     warningEnable = settings->value("DebugMode/warningEnable").toBool();
 
+
+    isSmooth = settings->value("isSmooth").toBool();
     xRange = settings->value("xRange").toInt();
     scroolBarBegin = timeStartBias*100;
     scroolBarEnd = scroolBarBegin+xRange/10;
@@ -346,7 +350,7 @@ QCustomPlot* MainWindow::addNewChart(int id){
     mChart->yAxis->setRange(leftYRange, rightYRange);
 
     mChart->setOpenGl(true);
-    mChart->graph(0)->setSmooth(true);
+    mChart->graph(0)->setSmooth(isSmooth);
 
     connect(mChart,SIGNAL(mouseWheel(QWheelEvent*)),this,SLOT(mouseWheel(QWheelEvent*)));
     connect(horizontalScrollBar, SIGNAL(customValueChanged(int,int)), this, SLOT(horzScrollBarChanged(int,int)));

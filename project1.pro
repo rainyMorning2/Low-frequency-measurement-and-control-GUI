@@ -21,6 +21,7 @@ SOURCES += \
     mainwindow.cpp \
     modeControl.cpp \
     qcustomplot.cpp \
+    settingwindow.cpp \
     stateDisplay.cpp \
     tcpConnection.cpp \
     threadTcp.cpp \
@@ -33,10 +34,12 @@ HEADERS += \
     customtext.h \
     mainwindow.h \
     qcustomplot.h \
+    settingwindow.h \
     threadTcp.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    settingwindow.ui
 
 TRANSLATIONS += \
     project1_zh_CN.ts
