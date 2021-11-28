@@ -5,32 +5,37 @@
 #include <QTcpSocket>
 #include <QDataStream>
 #include <QTimer>
+#include <QWaitCondition>
+#include <QMutex>
+#include <QFile>
+#include <QCoreApplication>
+
+extern QMutex mutex;
+extern QWaitCondition receievedAllData;
+
 
 class ThreadTcp : public QTcpSocket{
     Q_OBJECT
 public:
     ThreadTcp();
-    ThreadTcp(int,bool);
     ~ThreadTcp();
-
+    quint32* data;
+    int len;
 
 signals:
-    void sig_print(QString);
     void sig_connectSucceed();
     void sig_connectFailed();
-    void sig_updateAnalogData(quint32*);
-    void sig_realTimeRevChanged(bool);
 
 private:
     QDataStream data_stream;
-    QTimer* timer;
+    QByteArray stop;
 
 private slots:
     void connectTo(QString,int);
     void disconnectFrom();
     void send(QByteArray);
     void socket_Read_Data();
-    void updateAnalogData();
+    void setLen(int);
 };
 
 #endif // THREADTCP_H

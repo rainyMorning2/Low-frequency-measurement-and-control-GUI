@@ -1,30 +1,30 @@
 #include "threadTcp.h"
-#include <QSettings>
 
-quint32* data;
 bool isStart = false;
-bool isCheck;
 
-ThreadTcp::ThreadTcp(int interval,bool packageCheck)
+ThreadTcp::ThreadTcp()
 {
     data_stream.setDevice(this);
     data_stream.setByteOrder(QDataStream::LittleEndian);
-    timer = new QTimer(this);
-    timer->setInterval(interval);
-    data = new quint32[256];
-
-    isCheck = packageCheck;
-
     connect(this, SIGNAL(readyRead()),this,SLOT(socket_Read_Data()));
-    connect(timer,SIGNAL(timeout()),this,SLOT(updateAnalogData()));
+    stop.fill(0,1024);
 
+    stop[0] = 0xFA;
+    stop[1] = 0xF3;
+    stop[2] = 0x20;
+
+    stop[7] = 0x7A;
+    stop[6] = 0x02;
+    stop[5] = 0x20;
+
+    for(int i=3;i<1023;i++){
+        stop[1023] = stop[i] ^ stop[1023];
+    }
 }
 
 
 ThreadTcp::~ThreadTcp(){
-    delete  timer;
     delete []  data;
-    delete data;
 }
 
 
@@ -34,7 +34,7 @@ void ThreadTcp::connectTo(QString ip,int port){
     //连接服务器
     connectToHost(ip, port);
     //等待连接成功
-    if(!waitForConnected(10000))
+    if(!waitForConnected(1000))
     {
         emit sig_connectFailed();
         return;
@@ -48,6 +48,10 @@ void ThreadTcp::disconnectFrom(){
 }
 
 void ThreadTcp::send(QByteArray message){
+    QFile outFile(QCoreApplication::applicationDirPath() + "/sentData.dat");
+    outFile.open(QIODevice::WriteOnly);
+    outFile.write(message);
+    outFile.close();
     write(message);
     flush();
 }
@@ -60,39 +64,32 @@ void ThreadTcp::send(QByteArray message){
 
 void ThreadTcp::socket_Read_Data()
 {
-    if(bytesAvailable()>=1024 && !isStart){
-        timer->start();
+    if(bytesAvailable()>=1024*len && !isStart){
+
+        for(int j=0;j<len;j++){
+            for(int i=0;i<256;i++){
+                data_stream>>data[j*256+i];
+            }
+        }
         isStart = true;
-        emit sig_realTimeRevChanged(isStart);
+        receievedAllData.wakeAll();
+
+        // send stop signal
+        send(stop);
+
     }else{
         return;
     }
+//    QFile outFile(QCoreApplication::applicationDirPath() + "/sentData222.dat");
+//    outFile.open(QIODevice::WriteOnly);
+//    outFile.write(readAll());
+//    outFile.close();
 }
 
-void ThreadTcp::updateAnalogData(){
-    static int cnt = 0;
-    if(bytesAvailable()<1024){
-        timer->stop();
-        isStart = false;
-        emit sig_realTimeRevChanged(isStart);
-        return;
-    }
 
-    for(int i=0;i<256;i++){
-        data_stream>>data[i];
-
-        if(isCheck && i==0){
-            while((data[i]&0xFFFF0000) != 0x7E7E0000){
-                data_stream>>data[i];
-            }
-        }
-
-    }
-
-    if(isCheck && (data[255]&0x0000FFFF) != 0x00001A1A){
-        return;
-    }
-    qDebug()<<cnt<<" socket left"<<bytesAvailable();
-    cnt++;
-    emit sig_updateAnalogData(data);
+void ThreadTcp::setLen(int x){
+    len = x;
+    data = new quint32[256*len];
+    isStart = false;
+    readAll();
 }
