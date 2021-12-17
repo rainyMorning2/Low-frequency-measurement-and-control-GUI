@@ -259,6 +259,10 @@ void DataTrans::sendDigtalSet485(int channel_send,int channel_rev, QByteArray sr
     // rs422 data
     mess.replace(207,fileSize,src_mess);
 
+    if(fileSize==1 && (src_mess[0]^0x2C)==0){
+        mess[59] = 0x01;
+    }
+
     // check byte as package end
     for(int i=3;i<1023;i++){
         mess[1023] = mess[i] ^ mess[1023];
